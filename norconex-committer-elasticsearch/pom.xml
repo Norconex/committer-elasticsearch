@@ -292,10 +292,12 @@
 		<url>http://www.norconex.com</url>
 	</organization>
 	<scm>
-		<url>https://github.com/Norconex/collectors/tree/master/norconex-committer-elasticsearch</url>
+		<url>https://github.com/Norconex/committer-elasticsearch</url>
+		<connection>scm:git:git@github.com:Norconex/committer-elasticsearch.git</connection>
+		<developerConnection>scm:git:git@github.com:Norconex/committer-elasticsearch.git</developerConnection>
 	</scm>
 	<issueManagement>
-		<url>https://github.com/Norconex/collectors/issues</url>
+		<url>https://github.com/Norconex/committer-elasticsearch/issues</url>
 		<system>GitHub</system>
 	</issueManagement>
 
