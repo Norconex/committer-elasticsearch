@@ -29,7 +29,8 @@ import org.elasticsearch.node.NodeBuilder;
  * 
  * Implementation that creates a client that does not hold any data.
  * 
- * @see http://www.elasticsearch.org/guide/reference/java-api/client/
+ * @see <a href="http://www.elasticsearch.org/guide/reference/java-api/client/">
+ * http://www.elasticsearch.org/guide/reference/java-api/client/</a>
  * 
  * @author Pascal Dimassimo
  * 

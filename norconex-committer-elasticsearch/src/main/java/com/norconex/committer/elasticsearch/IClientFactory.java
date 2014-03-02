@@ -21,11 +21,9 @@ package com.norconex.committer.elasticsearch;
 import org.elasticsearch.client.Client;
 
 /**
- * 
  * Factory for Elasticsearch {@link Client}.
  * 
  * @author Pascal Dimassimo
- * 
  */
 public interface IClientFactory {
 
@@ -37,5 +35,5 @@ public interface IClientFactory {
      *            the client)
      * @return {@link Client}
      */
-    public Client createClient(ElasticsearchCommitter committer);
+    Client createClient(ElasticsearchCommitter committer);
 }

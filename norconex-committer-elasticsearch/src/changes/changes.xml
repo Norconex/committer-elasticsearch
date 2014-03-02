@@ -6,6 +6,11 @@
     <author email="info@norconex.com">Norconex Inc.</author>
   </properties>
   <body>
+    <release version="1.0.0" date="2014-??-??" description="Major release">
+      <action dev="essiembp" type="add">
+        Refactored to use Committer version 1.2.0
+      </action>
+    </release>
     <release version="1.0.0-RC1" date="2013-06-05" description="Open Source release">
       <action dev="dimassip" type="add">
         Starting with this release, Norconex Elasticsearch Committer is open-source under GPL.
