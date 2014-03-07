@@ -188,6 +188,12 @@
 							<goal>javadoc</goal>
 						</goals>
 					</execution>
+                    <execution>
+                      <id>attach-javadocs</id>
+                      <goals>
+                        <goal>jar</goal>
+                      </goals>
+                    </execution>
 				</executions>
 			</plugin>
 		</plugins>
@@ -232,26 +238,50 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<stylesheetfile>${basedir}/src/main/resources/javadoc.css</stylesheetfile>
-					<show>protected</show>
-					<detectLinks>true</detectLinks>
-				</configuration>
-				<reportSets>
-					<reportSet>
-						<id>default</id>
-						<configuration>
-						</configuration>
-						<reports>
-							<report>javadoc</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.9</version>
+              <configuration>
+                <overview>${basedir}/src/main/resources/javadoc-overview.html</overview>
+                <header><![CDATA[
+                  <style>div.aboutLanguage .siteLink {font-size: 2em;}</style>
+                  <span class="siteLink">
+                    <a href="http://www.norconex.com/product/committer-elasticsearch">Norconex Elasticsearch Committer</a>
+                  </span>
+                  ]]>
+                </header>
+                <footer><![CDATA[
+                  <script type="text/javascript">
+                    var _gaq = _gaq || [];
+                    _gaq.push(['_setAccount', 'UA-23162620-1']);
+                    _gaq.push(['_setDomainName', 'norconex.com']);
+                    _gaq.push(['_trackPageview']);
+                    (function() {
+                      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                    })();
+                  </script>
+                  <a style="font-size: 1.4em;" href="https://github.com/norconex/committer-elasticsearch/issues">Submit an Issue</a>
+                  &nbsp;&nbsp;|&nbsp;&nbsp; 
+                  <a style="font-size: 1.4em;" href="http://www.norconex.com">www.norconex.com</a>
+                  ]]>
+                </footer>
+                <show>protected</show>
+                <detectLinks>false</detectLinks>
+              </configuration>
+              <reportSets>
+                <reportSet>
+                  <id>default</id>
+                  <configuration>
+                  </configuration>
+                  <reports>
+                    <report>javadoc</report>
+                  </reports>
+                </reportSet>
+              </reportSets>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
