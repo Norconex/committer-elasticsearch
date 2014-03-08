@@ -39,7 +39,7 @@ $h2 Binaries
 
 $h2 Source
   
-Source code can be obtained on GitHub: (https://github.com/Norconex/committer-elasticsearch).
+Source code can be obtained on [GitHub](https://github.com/Norconex/committer-elasticsearch).
   
 Maven users can add the following to their pom.xml:
   

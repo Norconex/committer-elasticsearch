@@ -34,7 +34,8 @@ targeting <a href="http://www.elasticsearch.org/">Elasticsearch</a>.
 $h2 Installation
 
 This committer is a library that you must include in another product classpath
-(along with committer dependencies).  For use with a Norconex Collector, 
+(along with committer dependencies).  For use with a Norconex Collector
+(like [Norconex HTTP Collector](http://www.norconex.com/product/collector-http)), 
 follow these simple steps:
 
   * ([Download](./download.html)) the latest release of Elasticsearch Committer
@@ -43,6 +44,10 @@ follow these simple steps:
 
   * Copy the content of the `<committer_unzipped_folder>/lib` folder
     to `<collector_install_folder>/lib`.
+    
+  * If you notice different versions of the same library in the lib folder
+    it is usually best advised to keep the most recent copy only.
+    
     
 $h2 Configuration
 
