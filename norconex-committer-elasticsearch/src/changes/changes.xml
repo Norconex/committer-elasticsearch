@@ -10,8 +10,13 @@
       <action dev="essiembp" type="add">
         Can now retry on commit failures and specify a delay between retries.
       </action>
-      <action dev="essiembp" type="add">
-        Refactored to use Committer version 1.2.0.
+      <action dev="essiembp" type="update">
+        Upgraded to Committer version 1.2.0 and refactored code accordingly.
+      </action>
+      <action dev="essiembp" type="update">
+        "batchSize configuration option has been renamed to "queueSize".
+        "solrBatchSize" configuration options has been renamed to 
+        "committerBatchSize".
       </action>
     </release>
     <release version="1.0.0-RC1" date="2013-06-05" description="Open Source release">
