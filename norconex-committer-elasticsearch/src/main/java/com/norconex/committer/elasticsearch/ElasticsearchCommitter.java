@@ -173,23 +173,6 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         this.typeName = typeName;
     }
 
-    /**
-     * Unsupported operation.
-     */
-    @Override
-    public String getIdTargetField() {
-        throw new UnsupportedOperationException(
-                "Custom target id is not supported.");
-    }
-    /**
-     * Unsupported operation.
-     */
-    @Override
-    public void setIdTargetField(String idTargetField) {
-        throw new UnsupportedOperationException(
-                "Custom target id is not supported.");
-    }
-    
     @Override
     protected void commitBatch(List<ICommitOperation> batch) {
         if (StringUtils.isBlank(getIndexName())) {
