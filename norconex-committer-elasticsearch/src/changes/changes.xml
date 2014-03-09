@@ -6,7 +6,7 @@
     <author email="info@norconex.com">Norconex Inc.</author>
   </properties>
   <body>
-    <release version="1.0.0" date="2014-??-??" description="Major release">
+    <release version="1.0.0" date="2014-03-09" description="Stable release">
       <action dev="essiembp" type="add">
         Can now retry on commit failures and specify a delay between retries.
       </action>
