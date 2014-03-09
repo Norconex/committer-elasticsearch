@@ -176,7 +176,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9</version>
 				<configuration>
-					<stylesheetfile>${basedir}/src/main/resources/javadoc.css</stylesheetfile>
+                    <overview>${basedir}/src/site/resources/javadoc/overview.html</overview>        
 					<show>protected</show>
 					<detectLinks>true</detectLinks>
 				</configuration>
@@ -243,11 +243,11 @@
               <artifactId>maven-javadoc-plugin</artifactId>
               <version>2.9</version>
               <configuration>
-                <overview>${basedir}/src/main/resources/javadoc-overview.html</overview>
+                <overview>${basedir}/src/site/resources/javadoc/overview.html</overview>
                 <header><![CDATA[
                   <style>div.aboutLanguage .siteLink {font-size: 2em;}</style>
                   <span class="siteLink">
-                    <a href="http://www.norconex.com/product/committer-elasticsearch">Norconex Elasticsearch Committer</a>
+                    <a target="_top" href="http://www.norconex.com/product/committer-elasticsearch">Norconex Elasticsearch Committer</a>
                   </span>
                   ]]>
                 </header>
@@ -263,9 +263,9 @@
                       var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
                     })();
                   </script>
-                  <a style="font-size: 1.4em;" href="https://github.com/norconex/committer-elasticsearch/issues">Submit an Issue</a>
+                  <a style="font-size: 1.4em;" target="_top" href="https://github.com/norconex/committer-elasticsearch/issues">Submit an Issue</a>
                   &nbsp;&nbsp;|&nbsp;&nbsp; 
-                  <a style="font-size: 1.4em;" href="http://www.norconex.com">www.norconex.com</a>
+                  <a style="font-size: 1.4em;" target="_top" href="http://www.norconex.com">www.norconex.com</a>
                   ]]>
                 </footer>
                 <show>protected</show>
