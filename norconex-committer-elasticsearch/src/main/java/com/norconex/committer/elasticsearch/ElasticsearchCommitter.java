@@ -1,4 +1,4 @@
-/* Copyright 2013 Norconex Inc.
+/* Copyright 2014 Norconex Inc.
  * 
  * This file is part of Norconex ElasticSearch Committer.
  * 
@@ -62,14 +62,20 @@ import com.norconex.commons.lang.map.Properties;
  *      &lt;clusterName&gt;
  *         (Name of the ES cluster. Use if you have multiple clusters.)
  *      &lt;/clusterName&gt;
- *      &lt;idSourceField keep="[false|true]"&gt;
- *         (Name of source field that will be mapped to the ES "id" field
- *         or whatever "idTargetField" specified.
- *         Default is the document reference metadata field: 
- *         "document.reference".  Once re-mapped, the metadata source field is 
+ *      &lt;sourceReferenceField keep="[false|true]"&gt;
+ *         (Optional name of field that contains the document reference, when 
+ *         the default document reference is not used.  The reference value
+ *         will be mapped to the "targetReferenceField" 
+ *         specified.
+ *         Once re-mapped, this metadata source field is 
  *         deleted, unless "keep" is set to <code>true</code>.)
- *      &lt;/idSourceField&gt;
- *      &lt;contentSourceField keep="[false|true]&gt;
+ *      &lt;/sourceReferenceField&gt;
+ *      &lt;targetReferenceField&gt;
+ *         (Name of target repository field where to store a document reference.
+ *         If not specified, behavior is defined 
+ *         by the concrete implementation.) 
+ *      &lt;/targetReferenceField&gt;
+ *      &lt;contentSourceField keep="[false|true]&gt";
  *         (If you wish to use a metadata field to act as the document 
  *         "content", you can specify that field here.  Default 
  *         does not take a metadata field but rather the document content.
@@ -77,16 +83,16 @@ import com.norconex.commons.lang.map.Properties;
  *         unless "keep" is set to <code>true</code>.)
  *      &lt;/contentSourceField&gt;
  *      &lt;contentTargetField&gt;
- *         (ES target field name for a document content/body.
- *          Default is: content)
+ *         (Target repository field name for a document content/body.
+ *          Default is "content".)
  *      &lt;/contentTargetField&gt;
+ *      &lt;commitBatchSize&gt;
+ *          (max number of documents to send to Elasticsearch at once)
+ *      &lt;/commitBatchSize&gt;
  *      &lt;queueDir&gt;(optional path where to queue files)&lt;/queueDir&gt;
  *      &lt;queueSize&gt;(max queue size before committing)&lt;/queueSize&gt;
- *      &lt;commitBatchSize&gt;
- *          (max number of docs to send ES at once)
- *      &lt;/commitBatchSize&gt;
  *      &lt;maxRetries&gt;(max retries upon commit failures)&lt;/maxRetries&gt;
- *      &lt;maxRetryWait&gt;(max delay between retries)&lt;/maxRetryWait&gt;
+ *      &lt;maxRetryWait&gt;(max delay between retries)&lt;/maxRetryWait&gt;    
  *  &lt;/committer&gt;
  * </pre>
  * 
@@ -223,7 +229,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         for (IAddOperation op : addOperations) {
             IndexRequestBuilder request = 
                     client.prepareIndex(getIndexName(), getTypeName());
-            request.setId(op.getMetadata().getString(getIdSourceField()));
+            request.setId(op.getMetadata().getString(getSourceReferenceField()));
             request.setSource(buildSourceContent(op.getMetadata()));
             bulkRequest.add(request);
         }
@@ -234,7 +240,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         XContentBuilder builder = jsonBuilder().startObject();
         for (String key : fields.keySet()) {
             // Remove id from source unless specified to keep it
-            if (!isKeepIdSourceField() && key.equals(getIdSourceField())) {
+            if (!isKeepReferenceSourceField() && key.equals(getSourceReferenceField())) {
                 continue;
             }
             List<String> values = fields.getStrings(key);

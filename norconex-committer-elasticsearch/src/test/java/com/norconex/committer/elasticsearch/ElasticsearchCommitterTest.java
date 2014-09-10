@@ -1,4 +1,4 @@
-/* Copyright 2010-2013 Norconex Inc.
+/* Copyright 2010-2014 Norconex Inc.
  * 
  * This file is part of Norconex ElasticSearch Committer.
  * 
@@ -25,10 +25,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.StringReader;
 
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.NullInputStream;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
@@ -38,8 +41,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.norconex.committer.ICommitter;
-import com.norconex.commons.lang.config.ConfigurationLoader;
 import com.norconex.commons.lang.config.ConfigurationUtil;
 import com.norconex.commons.lang.map.Properties;
 
@@ -83,18 +84,22 @@ public class ElasticsearchCommitterTest {
     @Test
     public void testCommitAdd() throws Exception {
         String content = "hello world!";
-        File file = tempFolder.newFile();
-        FileUtils.write(file, content);
-
+        //File file = tempFolder.newFile();
+        //FileUtils.write(file, content);
+        InputStream is = IOUtils.toInputStream(content);
+        
         String id = "1";
         Properties metadata = new Properties();
-        metadata.addString(ICommitter.DEFAULT_DOCUMENT_REFERENCE, id);
+        metadata.addString("myreference", id);
 
+        
         // Add new doc to ES
-        committer.queueAdd(id, file, metadata);
+        committer.add(id,  is, metadata);
 
         committer.commit();
 
+        IOUtils.closeQuietly(is);
+        
         // Check that it's in ES
         GetResponse response = client.prepareGet(indexName, typeName, id)
                 .execute().actionGet();
@@ -106,7 +111,7 @@ public class ElasticsearchCommitterTest {
                         ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD));
         // Check id field is removed
         assertFalse(response.getSource().containsKey(
-                ICommitter.DEFAULT_DOCUMENT_REFERENCE));
+                "myreference"));
     }
 
     @Test
@@ -121,8 +126,8 @@ public class ElasticsearchCommitterTest {
 
         // Queue it to be deleted
         Properties metadata = new Properties();
-        metadata.addString(ICommitter.DEFAULT_DOCUMENT_REFERENCE, id);
-        committer.queueRemove(id, tempFolder.newFile(), metadata);
+        metadata.addString("myreference", id);
+        committer.remove(id, metadata);
 
         committer.commit();
 
@@ -137,10 +142,10 @@ public class ElasticsearchCommitterTest {
 
         String id = "1";
         Properties metadata = new Properties();
-        metadata.addString(ICommitter.DEFAULT_DOCUMENT_REFERENCE, id);
+        metadata.addString("myreference", id);
 
         // Add new doc to ES
-        committer.queueAdd(id, tempFolder.newFile(), metadata);
+        committer.add(id, new NullInputStream(0), metadata);
         committer.commit();
 
         // After commit, make sure queue is emptied of all files
@@ -152,10 +157,10 @@ public class ElasticsearchCommitterTest {
 
         String id = "1";
         Properties metadata = new Properties();
-        metadata.addString(ICommitter.DEFAULT_DOCUMENT_REFERENCE, id);
+        metadata.addString("myreference", id);
 
         // Add new doc to ES
-        committer.queueRemove(id, tempFolder.newFile(), metadata);
+        committer.remove(id, metadata);
         committer.commit();
 
         // After commit, make sure queue is emptied of all files
@@ -167,8 +172,8 @@ public class ElasticsearchCommitterTest {
 
         String xml = 
                 "<committer><idTargetField>newid</idTargetField></committer>";
-        XMLConfiguration config = ConfigurationLoader.loadXML(new StringReader(
-                xml));
+        XMLConfiguration config = ConfigurationUtil.newXMLConfiguration(
+                new StringReader(xml));
         try {
             committer.loadFromXml(config);
             fail("Expected exception because idTargetField is not supported");
@@ -182,11 +187,11 @@ public class ElasticsearchCommitterTest {
 
         String id = "1";
         Properties metadata = new Properties();
-        metadata.addString(ICommitter.DEFAULT_DOCUMENT_REFERENCE, id);
+        metadata.addString("myreference", id);
 
         // Add new doc to ES
         committer.setKeepContentSourceField(true);
-        committer.queueAdd(id, tempFolder.newFile(), metadata);
+        committer.add(id, new NullInputStream(0), metadata);
 
         committer.commit();
 
@@ -196,7 +201,7 @@ public class ElasticsearchCommitterTest {
         assertTrue(response.isExists());
         // Check id field is kept
         assertFalse(response.getSource().containsKey(
-                ICommitter.DEFAULT_DOCUMENT_REFERENCE));
+                "myreference"));
 
     }
 
@@ -205,9 +210,9 @@ public class ElasticsearchCommitterTest {
         committer.setQueueDir("my-queue-dir");
         committer.setContentSourceField("contentSourceField");
         committer.setContentTargetField("contentTargetField");
-        committer.setIdSourceField("idField");
+        committer.setSourceReferenceField("idField");
         committer.setKeepContentSourceField(true);
-        committer.setKeepIdSourceField(false);
+        committer.setKeepReferenceSourceField(false);
         committer.setQueueSize(10);
         committer.setCommitBatchSize(1);
         committer.setClusterName("my-cluster");

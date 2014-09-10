@@ -6,6 +6,20 @@
     <author email="info@norconex.com">Norconex Inc.</author>
   </properties>
   <body>
+
+    <release version="2.0.0" date="2014-??-??" description="Major release">
+      <action dev="essiembp" type="update">
+        Upgraded to work with Norconex Committer 2.0.0 (won't work with 
+        older versions).
+      </action>
+      <action dev="essiembp" type="update">
+        Document "id" is now referred as document "reference".
+      </action>
+      <action dev="essiembp" type="update">
+        Now requires Java 7 or higher.
+      </action>
+    </release>
+  
     <release version="1.0.0" date="2014-03-09" description="Stable release">
       <action dev="essiembp" type="add">
         Can now retry on commit failures and specify a delay between retries.
@@ -19,10 +33,12 @@
         "committerBatchSize".
       </action>
     </release>
+
     <release version="1.0.0-RC1" date="2013-06-05" description="Open Source release">
       <action dev="dimassip" type="add">
         Starting with this release, Norconex Elasticsearch Committer is open-source under GPL.
       </action>
     </release>
+
   </body>
 </document>
