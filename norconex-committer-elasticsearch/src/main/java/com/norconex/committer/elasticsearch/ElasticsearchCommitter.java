@@ -33,6 +33,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
@@ -272,7 +273,9 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
      * @param bulkRequest
      */
     private void sendBulkToES(BulkRequestBuilder bulkRequest) {
-        BulkResponse bulkResponse = bulkRequest.execute().actionGet();
+        ListenableActionFuture<BulkResponse> execution = bulkRequest.execute();
+        
+        BulkResponse bulkResponse = execution.actionGet();
         if (bulkResponse.hasFailures()) {
             throw new CommitterException(
                     "Cannot index document batch to Elasticsearch: "

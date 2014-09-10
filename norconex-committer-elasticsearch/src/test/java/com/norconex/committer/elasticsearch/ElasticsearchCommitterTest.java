@@ -27,6 +27,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.util.Map;
 
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
@@ -90,7 +91,7 @@ public class ElasticsearchCommitterTest {
         
         String id = "1";
         Properties metadata = new Properties();
-        metadata.addString("myreference", id);
+        metadata.addString("document.reference", id);
 
         
         // Add new doc to ES
@@ -105,13 +106,13 @@ public class ElasticsearchCommitterTest {
                 .execute().actionGet();
         assertTrue(response.isExists());
         // Check content
-        assertEquals(
-                content,
-                response.getSource().get(
-                        ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD));
+        
+        Map<String, Object> responseMap = response.getSource();
+        assertEquals(content, responseMap.get(
+                ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD));
         // Check id field is removed
         assertFalse(response.getSource().containsKey(
-                "myreference"));
+                "document.reference"));
     }
 
     @Test
@@ -126,7 +127,7 @@ public class ElasticsearchCommitterTest {
 
         // Queue it to be deleted
         Properties metadata = new Properties();
-        metadata.addString("myreference", id);
+        metadata.addString("document.reference", id);
         committer.remove(id, metadata);
 
         committer.commit();
@@ -142,7 +143,7 @@ public class ElasticsearchCommitterTest {
 
         String id = "1";
         Properties metadata = new Properties();
-        metadata.addString("myreference", id);
+        metadata.addString("document.reference", id);
 
         // Add new doc to ES
         committer.add(id, new NullInputStream(0), metadata);
@@ -157,7 +158,7 @@ public class ElasticsearchCommitterTest {
 
         String id = "1";
         Properties metadata = new Properties();
-        metadata.addString("myreference", id);
+        metadata.addString("document.reference", id);
 
         // Add new doc to ES
         committer.remove(id, metadata);
@@ -187,7 +188,7 @@ public class ElasticsearchCommitterTest {
 
         String id = "1";
         Properties metadata = new Properties();
-        metadata.addString("myreference", id);
+        metadata.addString("document.reference", id);
 
         // Add new doc to ES
         committer.setKeepContentSourceField(true);
@@ -201,7 +202,7 @@ public class ElasticsearchCommitterTest {
         assertTrue(response.isExists());
         // Check id field is kept
         assertFalse(response.getSource().containsKey(
-                "myreference"));
+                "document.reference"));
 
     }
 
