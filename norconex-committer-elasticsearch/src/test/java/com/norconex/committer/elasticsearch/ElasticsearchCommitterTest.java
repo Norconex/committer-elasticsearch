@@ -21,6 +21,7 @@ package com.norconex.committer.elasticsearch;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -47,8 +48,6 @@ import com.norconex.commons.lang.map.Properties;
 
 
 public class ElasticsearchCommitterTest {
-
-    private static final String DOCUMENT_REFERENCE = "document.reference";
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
@@ -79,25 +78,21 @@ public class ElasticsearchCommitterTest {
 
         committer.setIndexName(indexName);
         committer.setTypeName(typeName);
+        committer.setContentTargetField(
+                ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD);
 
         queue = tempFolder.newFolder("queue");
         committer.setQueueDir(queue.toString());
-        committer.setSourceReferenceField(DOCUMENT_REFERENCE);
     }
 
     @Test
     public void testCommitAdd() throws Exception {
         String content = "hello world!";
         InputStream is = IOUtils.toInputStream(content);
-        
-        String id = "1";
-        Properties metadata = new Properties();
-        metadata.addString(DOCUMENT_REFERENCE, id);
 
-        
         // Add new doc to ES
-        committer.add(id,  is, metadata);
-
+        String id = "1";
+        committer.add(id,  is, new Properties());
         committer.commit();
 
         IOUtils.closeQuietly(is);
@@ -111,9 +106,6 @@ public class ElasticsearchCommitterTest {
         Map<String, Object> responseMap = response.getSource();
         assertEquals(content, responseMap.get(
                 ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD));
-        // Check id field is removed
-        assertFalse(response.getSource().containsKey(
-                DOCUMENT_REFERENCE));
     }
 
     @Test
@@ -127,10 +119,7 @@ public class ElasticsearchCommitterTest {
         request.execute();
 
         // Queue it to be deleted
-        Properties metadata = new Properties();
-        metadata.addString(DOCUMENT_REFERENCE, id);
-        committer.remove(id, metadata);
-
+        committer.remove(id, new Properties());
         committer.commit();
 
         // Check that it's removed from ES
@@ -142,12 +131,9 @@ public class ElasticsearchCommitterTest {
     @Test
     public void testRemoveQueuedFilesAfterAdd() throws Exception {
 
-        String id = "1";
-        Properties metadata = new Properties();
-        metadata.addString(DOCUMENT_REFERENCE, id);
-
         // Add new doc to ES
-        committer.add(id, new NullInputStream(0), metadata);
+        String id = "1";
+        committer.add(id, new NullInputStream(0), new Properties());
         committer.commit();
 
         // After commit, make sure queue is emptied of all files
@@ -157,12 +143,9 @@ public class ElasticsearchCommitterTest {
     @Test
     public void testRemoveQueuedFilesAfterDelete() throws Exception {
 
-        String id = "1";
-        Properties metadata = new Properties();
-        metadata.addString(DOCUMENT_REFERENCE, id);
-
         // Add new doc to ES
-        committer.remove(id, metadata);
+        String id = "1";
+        committer.remove(id, new Properties());
         committer.commit();
 
         // After commit, make sure queue is emptied of all files
@@ -173,7 +156,7 @@ public class ElasticsearchCommitterTest {
     public void testUnsupportedIdTargetField() throws Exception {
 
         String xml = 
-                "<committer><idTargetField>newid</idTargetField></committer>";
+                "<committer><targetReferenceField>newid</targetReferenceField></committer>";
         XMLConfiguration config = ConfigurationUtil.newXMLConfiguration(
                 new StringReader(xml));
         try {
@@ -182,29 +165,6 @@ public class ElasticsearchCommitterTest {
         } catch (Exception e) {
             // Expected
         }
-    }
-
-    @Test
-    public void testKeepIdSourceField() throws Exception {
-
-        String id = "1";
-        Properties metadata = new Properties();
-        metadata.addString(DOCUMENT_REFERENCE, id);
-
-        // Add new doc to ES
-        committer.setKeepContentSourceField(true);
-        committer.add(id, new NullInputStream(0), metadata);
-
-        committer.commit();
-
-        // Check that it's in ES
-        GetResponse response = client.prepareGet(indexName, typeName, id)
-                .execute().actionGet();
-        assertTrue(response.isExists());
-        // Check id field is kept
-        assertFalse(response.getSource().containsKey(
-                DOCUMENT_REFERENCE));
-
     }
 
     @Test
@@ -222,6 +182,165 @@ public class ElasticsearchCommitterTest {
         committer.setTypeName("my-type");
 
         ConfigurationUtil.assertWriteRead(committer);
+    }
+    
+    @Test
+    public void testSetSourceReferenceField() throws Exception {
+
+        String content = "hello world!";
+        InputStream is = IOUtils.toInputStream(content);
+
+        // Force to use a reference field instead of the default
+        // reference ID.
+        String sourceReferenceField = "customId";
+        committer.setSourceReferenceField(sourceReferenceField);
+        Properties metadata = new Properties();
+        String customIdValue = "ABC";
+        metadata.setString(sourceReferenceField, customIdValue);
+
+        // Add new doc to ES with a difference id than the one we
+        // assigned in source reference field
+        committer.add("1",  is, metadata);
+        committer.commit();
+
+        IOUtils.closeQuietly(is);
+        
+        // Check that it's in ES using the custom ID
+        GetResponse response = client.prepareGet(indexName, typeName, customIdValue)
+                .execute().actionGet();
+        assertTrue(response.isExists());
+        
+        // Check content
+        Map<String, Object> responseMap = response.getSource();
+        assertEquals(content, responseMap.get(
+                ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD));
+        
+        // Check custom id field is removed (default behavior)
+        assertFalse(response.getSource().containsKey(
+                sourceReferenceField));
+    }
+    
+    @Test
+    public void testKeepIdSourceField() throws Exception {
+
+        String content = "hello world!";
+        InputStream is = IOUtils.toInputStream(content);
+
+        // Force to use a reference field instead of the default
+        // reference ID.
+        String sourceReferenceField = "customId";
+        committer.setSourceReferenceField(sourceReferenceField);
+        Properties metadata = new Properties();
+        String customIdValue = "ABC";
+        metadata.setString(sourceReferenceField, customIdValue);
+
+        // Add new doc to ES with a difference id than the one we
+        // assigned in source reference field. Set to keep that 
+        // field.
+        committer.setKeepReferenceSourceField(true);
+        committer.add("1",  is, metadata);
+        committer.commit();
+
+        IOUtils.closeQuietly(is);
+        
+        // Check that it's in ES using the custom ID
+        GetResponse response = client.prepareGet(indexName, typeName, customIdValue)
+                .execute().actionGet();
+        assertTrue(response.isExists());
+        
+        // Check custom id field is NOT removed
+        assertTrue(response.getSource().containsKey(
+                sourceReferenceField));
+    }
+    
+    @Test
+    public void testCustomContentSourceField() throws Exception {
+        
+        // Set content from metadata
+        String content = "hello world!";
+        String contentSourceField = "customContent";
+        Properties metadata = new Properties();
+        metadata.setString(contentSourceField, content);
+        
+        // Add new doc to ES. Set a null input stream, because content
+        // will be taken from metadata. 
+        String id = "1";
+        committer.setContentSourceField(contentSourceField);
+        committer.add(id,  new NullInputStream(0), metadata);
+        committer.commit();
+        
+        // Check that it's in ES
+        GetResponse response = client.prepareGet(indexName, typeName, id)
+                .execute().actionGet();
+        assertTrue(response.isExists());
+        
+        // Check content
+        Map<String, Object> responseMap = response.getSource();
+        assertEquals(content, responseMap.get(
+                ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD));
+        
+        // Check custom source field is removed (default behavior)
+        assertFalse(response.getSource().containsKey(
+                contentSourceField));
+    }
+    
+    @Test
+    public void testKeepCustomContentSourceField() throws Exception {
+        
+        // Set content from metadata
+        String content = "hello world!";
+        String contentSourceField = "customContent";
+        Properties metadata = new Properties();
+        metadata.setString(contentSourceField, content);
+        
+        // Add new doc to ES. Set a null input stream, because content
+        // will be taken from metadata. Set to keep the source metadata
+        // field.
+        String id = "1";
+        committer.setContentSourceField(contentSourceField);
+        committer.setKeepContentSourceField(true);
+        committer.add(id,  new NullInputStream(0), metadata);
+        committer.commit();
+        
+        // Check that it's in ES
+        GetResponse response = client.prepareGet(indexName, typeName, id)
+                .execute().actionGet();
+        assertTrue(response.isExists());
+        
+        // Check custom source field is kept
+        assertTrue(response.getSource().containsKey(
+                contentSourceField));
+    }
+    
+    @Test
+    public void testCustomContentTargetField() throws Exception {
+
+        String content = "hello world!";
+        InputStream is = IOUtils.toInputStream(content);
+        
+        String contentTargetField = "customContent";
+        Properties metadata = new Properties();
+        metadata.setString(contentTargetField, content);
+        
+        // Add new doc to ES
+        String id = "1";
+        committer.setContentTargetField(contentTargetField);
+        committer.add(id, is, metadata);
+        committer.commit();
+        
+        IOUtils.closeQuietly(is);
+        
+        // Check that it's in ES
+        GetResponse response = client.prepareGet(indexName, typeName, id)
+                .execute().actionGet();
+        assertTrue(response.isExists());
+        
+        // Check content is available in custom content target field and
+        // not in the default field
+        Map<String, Object> responseMap = response.getSource();
+        assertEquals(content, responseMap.get(contentTargetField));
+        assertNull(responseMap.get(
+                ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD));
     }
 
 }

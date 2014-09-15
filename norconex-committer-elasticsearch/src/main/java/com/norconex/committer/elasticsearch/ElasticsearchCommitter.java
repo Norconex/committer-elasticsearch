@@ -66,16 +66,10 @@ import com.norconex.commons.lang.map.Properties;
  *      &lt;sourceReferenceField keep="[false|true]"&gt;
  *         (Optional name of field that contains the document reference, when 
  *         the default document reference is not used.  The reference value
- *         will be mapped to the "targetReferenceField" 
- *         specified.
+ *         will be mapped to the Elasticsearch ID field. 
  *         Once re-mapped, this metadata source field is 
  *         deleted, unless "keep" is set to <code>true</code>.)
  *      &lt;/sourceReferenceField&gt;
- *      &lt;targetReferenceField&gt;
- *         (Name of target repository field where to store a document reference.
- *         If not specified, behavior is defined 
- *         by the concrete implementation.) 
- *      &lt;/targetReferenceField&gt;
  *      &lt;contentSourceField keep="[false|true]&gt";
  *         (If you wish to use a metadata field to act as the document 
  *         "content", you can specify that field here.  Default 
@@ -124,7 +118,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
 
     /**
      * Constructor.
-     * @param factory Elasticsearch client factorys
+     * @param factory Elasticsearch client factory
      */
     public ElasticsearchCommitter(IClientFactory factory) {
         if (factory == null) {
@@ -132,7 +126,6 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         } else {
             this.clientFactory = factory;
         }
-        setContentTargetField(DEFAULT_ES_CONTENT_FIELD);
     }
 
     /**
@@ -230,7 +223,11 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         for (IAddOperation op : addOperations) {
             IndexRequestBuilder request = 
                     client.prepareIndex(getIndexName(), getTypeName());
-            request.setId(op.getMetadata().getString(getSourceReferenceField()));
+            String id = op.getMetadata().getString(getSourceReferenceField());
+            if (StringUtils.isBlank(id)) {
+                id = op.getReference();
+            }
+            request.setId(id);
             request.setSource(buildSourceContent(op.getMetadata()));
             bulkRequest.add(request);
         }
@@ -302,9 +299,15 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
 
     @Override
     protected void loadFromXml(XMLConfiguration xml) {
-        if (StringUtils.isNotBlank(xml.getString("idTargetField"))) {
+        if (StringUtils.isNotBlank(xml.getString("targetReferenceField"))) {
             throw new UnsupportedOperationException(
-                    "idTargetField is not supported by ElasticsearchCommitter");
+                    "targetReferenceField is not supported by ElasticsearchCommitter");
+        }
+        String contentTargetField = xml.getString("contentTargetField");
+        if (StringUtils.isNotBlank(contentTargetField)) {
+            setContentTargetField(contentTargetField);
+        } else {
+            setContentTargetField(DEFAULT_ES_CONTENT_FIELD);
         }
         setClusterName(xml.getString("clusterName", null));
         setIndexName(xml.getString("indexName", null));
