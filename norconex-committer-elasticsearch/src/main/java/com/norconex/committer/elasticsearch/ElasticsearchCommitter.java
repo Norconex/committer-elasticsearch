@@ -96,8 +96,6 @@ import com.norconex.commons.lang.map.Properties;
  */
 public class ElasticsearchCommitter extends AbstractMappedCommitter {
 
-    private static final long serialVersionUID = 7000534391754478817L;
-
     private static final Logger LOG = LogManager
             .getLogger(ElasticsearchCommitter.class);
 
