@@ -31,6 +31,7 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.elasticsearch.action.ListenableActionFuture;
@@ -339,14 +340,10 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
 
     @Override
     public String toString() {
-        return String.format("ElasticsearchCommitter "
-                + "[esBatchSize=%s, docsToAdd=%s, docsToRemove=%s, "
-                + "clientFactory=%s, client=%s, clusterName=%s, "
-                + "indexName=%s, typeName=%s, bulkRequest=%s, "
-                + "BaseCommitter=%s]",
-                clientFactory, client, clusterName, indexName, typeName,
-                super.toString());
+        return new ToStringBuilder(this).appendSuper(super.toString())
+                .append("clientFactory", clientFactory)
+                .append("client", client).append("clusterName", clusterName)
+                .append("indexName", indexName).append("typeName", typeName)
+                .toString();
     }
-
-
 }
