@@ -58,7 +58,7 @@ import com.norconex.commons.lang.map.Properties;
  * </p>
  * 
  * <pre>
- *  &lt;committer class="com.norconex.committer.core.elasticsearch.ElasticsearchCommitter"&gt;
+ *  &lt;committer class="com.norconex.committer.elasticsearch.ElasticsearchCommitter"&gt;
  *      &lt;indexName&gt;(Name of the index to use)&lt;/indexName&gt;
  *      &lt;typeName&gt;(Name of the type to use)&lt;/typeName&gt;
  *      &lt;clusterName&gt;
@@ -71,24 +71,24 @@ import com.norconex.commons.lang.map.Properties;
  *         Once re-mapped, this metadata source field is 
  *         deleted, unless "keep" is set to <code>true</code>.)
  *      &lt;/sourceReferenceField&gt;
- *      &lt;contentSourceField keep="[false|true]&gt";
+ *      &lt;sourceContentField keep="[false|true]"&gt
  *         (If you wish to use a metadata field to act as the document 
  *         "content", you can specify that field here.  Default 
  *         does not take a metadata field but rather the document content.
  *         Once re-mapped, the metadata source field is deleted,
  *         unless "keep" is set to <code>true</code>.)
- *      &lt;/contentSourceField&gt;
- *      &lt;contentTargetField&gt;
+ *      &lt;/sourceContentField&gt;
+ *      &lt;targetContentField&gt;
  *         (Target repository field name for a document content/body.
  *          Default is "content".)
- *      &lt;/contentTargetField&gt;
+ *      &lt;/targetContentField&gt;
  *      &lt;commitBatchSize&gt;
  *          (max number of documents to send to Elasticsearch at once)
  *      &lt;/commitBatchSize&gt;
  *      &lt;queueDir&gt;(optional path where to queue files)&lt;/queueDir&gt;
  *      &lt;queueSize&gt;(max queue size before committing)&lt;/queueSize&gt;
  *      &lt;maxRetries&gt;(max retries upon commit failures)&lt;/maxRetries&gt;
- *      &lt;maxRetryWait&gt;(max delay between retries)&lt;/maxRetryWait&gt;    
+ *      &lt;maxRetryWait&gt;(max delay between retries)&lt;/maxRetryWait&gt;
  *  &lt;/committer&gt;
  * </pre>
  * 
@@ -237,7 +237,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         XContentBuilder builder = jsonBuilder().startObject();
         for (String key : fields.keySet()) {
             // Remove id from source unless specified to keep it
-            if (!isKeepReferenceSourceField() && key.equals(getSourceReferenceField())) {
+            if (!isKeepSourceReferenceField() && key.equals(getSourceReferenceField())) {
                 continue;
             }
             List<String> values = fields.getStrings(key);
@@ -302,11 +302,11 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
             throw new UnsupportedOperationException(
                     "targetReferenceField is not supported by ElasticsearchCommitter");
         }
-        String contentTargetField = xml.getString("contentTargetField");
-        if (StringUtils.isNotBlank(contentTargetField)) {
-            setContentTargetField(contentTargetField);
+        String targetContentField = xml.getString("targetContentField");
+        if (StringUtils.isNotBlank(targetContentField)) {
+            setTargetContentField(targetContentField);
         } else {
-            setContentTargetField(DEFAULT_ES_CONTENT_FIELD);
+            setTargetContentField(DEFAULT_ES_CONTENT_FIELD);
         }
         setClusterName(xml.getString("clusterName", null));
         setIndexName(xml.getString("indexName", null));

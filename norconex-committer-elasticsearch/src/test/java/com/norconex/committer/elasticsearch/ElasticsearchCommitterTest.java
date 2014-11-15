@@ -78,7 +78,7 @@ public class ElasticsearchCommitterTest {
 
         committer.setIndexName(indexName);
         committer.setTypeName(typeName);
-        committer.setContentTargetField(
+        committer.setTargetContentField(
                 ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD);
 
         queue = tempFolder.newFolder("queue");
@@ -170,11 +170,11 @@ public class ElasticsearchCommitterTest {
     @Test
     public void testWriteRead() throws Exception {
         committer.setQueueDir("my-queue-dir");
-        committer.setContentSourceField("contentSourceField");
-        committer.setContentTargetField("contentTargetField");
+        committer.setSourceContentField("sourceContentField");
+        committer.setTargetContentField("targetContentField");
         committer.setSourceReferenceField("idField");
-        committer.setKeepContentSourceField(true);
-        committer.setKeepReferenceSourceField(false);
+        committer.setKeepSourceContentField(true);
+        committer.setKeepSourceReferenceField(false);
         committer.setQueueSize(10);
         committer.setCommitBatchSize(1);
         committer.setClusterName("my-cluster");
@@ -237,7 +237,7 @@ public class ElasticsearchCommitterTest {
         // Add new doc to ES with a difference id than the one we
         // assigned in source reference field. Set to keep that 
         // field.
-        committer.setKeepReferenceSourceField(true);
+        committer.setKeepSourceReferenceField(true);
         committer.add("1",  is, metadata);
         committer.commit();
 
@@ -254,18 +254,18 @@ public class ElasticsearchCommitterTest {
     }
     
     @Test
-    public void testCustomContentSourceField() throws Exception {
+    public void testCustomsourceContentField() throws Exception {
         
         // Set content from metadata
         String content = "hello world!";
-        String contentSourceField = "customContent";
+        String sourceContentField = "customContent";
         Properties metadata = new Properties();
-        metadata.setString(contentSourceField, content);
+        metadata.setString(sourceContentField, content);
         
         // Add new doc to ES. Set a null input stream, because content
         // will be taken from metadata. 
         String id = "1";
-        committer.setContentSourceField(contentSourceField);
+        committer.setSourceContentField(sourceContentField);
         committer.add(id,  new NullInputStream(0), metadata);
         committer.commit();
         
@@ -281,24 +281,24 @@ public class ElasticsearchCommitterTest {
         
         // Check custom source field is removed (default behavior)
         assertFalse(response.getSource().containsKey(
-                contentSourceField));
+                sourceContentField));
     }
     
     @Test
-    public void testKeepCustomContentSourceField() throws Exception {
+    public void testKeepCustomsourceContentField() throws Exception {
         
         // Set content from metadata
         String content = "hello world!";
-        String contentSourceField = "customContent";
+        String sourceContentField = "customContent";
         Properties metadata = new Properties();
-        metadata.setString(contentSourceField, content);
+        metadata.setString(sourceContentField, content);
         
         // Add new doc to ES. Set a null input stream, because content
         // will be taken from metadata. Set to keep the source metadata
         // field.
         String id = "1";
-        committer.setContentSourceField(contentSourceField);
-        committer.setKeepContentSourceField(true);
+        committer.setSourceContentField(sourceContentField);
+        committer.setKeepSourceContentField(true);
         committer.add(id,  new NullInputStream(0), metadata);
         committer.commit();
         
@@ -309,22 +309,22 @@ public class ElasticsearchCommitterTest {
         
         // Check custom source field is kept
         assertTrue(response.getSource().containsKey(
-                contentSourceField));
+                sourceContentField));
     }
     
     @Test
-    public void testCustomContentTargetField() throws Exception {
+    public void testCustomtargetContentField() throws Exception {
 
         String content = "hello world!";
         InputStream is = IOUtils.toInputStream(content);
         
-        String contentTargetField = "customContent";
+        String targetContentField = "customContent";
         Properties metadata = new Properties();
-        metadata.setString(contentTargetField, content);
+        metadata.setString(targetContentField, content);
         
         // Add new doc to ES
         String id = "1";
-        committer.setContentTargetField(contentTargetField);
+        committer.setTargetContentField(targetContentField);
         committer.add(id, is, metadata);
         committer.commit();
         
@@ -338,7 +338,7 @@ public class ElasticsearchCommitterTest {
         // Check content is available in custom content target field and
         // not in the default field
         Map<String, Object> responseMap = response.getSource();
-        assertEquals(content, responseMap.get(contentTargetField));
+        assertEquals(content, responseMap.get(targetContentField));
         assertNull(responseMap.get(
                 ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD));
     }
