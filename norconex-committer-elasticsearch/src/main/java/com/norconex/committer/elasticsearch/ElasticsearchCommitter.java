@@ -42,11 +42,11 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
-import com.norconex.committer.AbstractMappedCommitter;
-import com.norconex.committer.CommitterException;
-import com.norconex.committer.IAddOperation;
-import com.norconex.committer.ICommitOperation;
-import com.norconex.committer.IDeleteOperation;
+import com.norconex.committer.core.AbstractMappedCommitter;
+import com.norconex.committer.core.CommitterException;
+import com.norconex.committer.core.IAddOperation;
+import com.norconex.committer.core.ICommitOperation;
+import com.norconex.committer.core.IDeleteOperation;
 import com.norconex.commons.lang.map.Properties;
 
 /**
@@ -58,7 +58,7 @@ import com.norconex.commons.lang.map.Properties;
  * </p>
  * 
  * <pre>
- *  &lt;committer class="com.norconex.committer.elasticsearch.ElasticsearchCommitter"&gt;
+ *  &lt;committer class="com.norconex.committer.core.elasticsearch.ElasticsearchCommitter"&gt;
  *      &lt;indexName&gt;(Name of the index to use)&lt;/indexName&gt;
  *      &lt;typeName&gt;(Name of the type to use)&lt;/typeName&gt;
  *      &lt;clusterName&gt;
