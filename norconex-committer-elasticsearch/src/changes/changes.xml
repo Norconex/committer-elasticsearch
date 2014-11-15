@@ -7,7 +7,7 @@
   </properties>
   <body>
 
-    <release version="2.0.0" date="2014-??-??" description="Major release">
+    <release version="2.0.0-SNAPSHOT" date="2014-??-??" description="Major release">
       <action dev="essiembp" type="update">
         Upgraded to work with Norconex Committer 2.0.0 (won't work with 
         older versions).
