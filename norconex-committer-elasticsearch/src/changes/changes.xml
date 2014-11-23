@@ -9,6 +9,9 @@
 
     <release version="2.0.0-SNAPSHOT" date="2014-??-??" description="Major release">
       <action dev="essiembp" type="update">
+        Now licensed under The Apache License, Version 2.0.
+      </action>
+      <action dev="essiembp" type="update">
         Upgraded to work with Norconex Committer 2.0.0 (won't work with 
         older versions).
       </action>
