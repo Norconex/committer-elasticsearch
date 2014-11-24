@@ -1,7 +1,7 @@
-Norconex Committer Elasticsearch
+Norconex Elasticsearch Committer
 Copyright 2013 Norconex Inc.
 
-For any inquiries about Norconex Committer Elasticsearch, please contact 
+For any inquiries about Norconex Elasticsearch Committer, please contact 
 Norconex Inc. at info@norconex.com.
 
 This product website and documentation is located at:

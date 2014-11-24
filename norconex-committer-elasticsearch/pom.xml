@@ -332,7 +332,7 @@
                 <header><![CDATA[
                   <style>div.aboutLanguage .siteLink {font-size: 2em;}</style>
                   <span class="siteLink">
-                    <a target="_top" href="http://www.norconex.com/product/committer-elasticsearch">Norconex Elasticsearch Committer</a>
+                    <a target="_top" href="http://www.norconex.com/collectors/committer-elasticsearch">Norconex Elasticsearch Committer</a>
                   </span>
                   ]]>
                 </header>
