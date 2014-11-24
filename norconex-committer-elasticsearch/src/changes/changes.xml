@@ -8,29 +8,29 @@
   <body>
 
     <release version="2.0.0-SNAPSHOT" date="2014-??-??" description="Major release">
-      <action dev="essiembp" type="update">
+      <action dev="essiembre" type="update">
         Now licensed under The Apache License, Version 2.0.
       </action>
-      <action dev="essiembp" type="update">
+      <action dev="essiembre" type="update">
         Upgraded to work with Norconex Committer 2.0.0 (won't work with 
         older versions).
       </action>
-      <action dev="essiembp" type="update">
+      <action dev="essiembre" type="update">
         Document "id" is now referred as document "reference".
       </action>
-      <action dev="essiembp" type="update">
+      <action dev="essiembre" type="update">
         Now requires Java 7 or higher.
       </action>
     </release>
   
     <release version="1.0.0" date="2014-03-09" description="Stable release">
-      <action dev="essiembp" type="add">
+      <action dev="essiembre" type="add">
         Can now retry on commit failures and specify a delay between retries.
       </action>
-      <action dev="essiembp" type="update">
+      <action dev="essiembre" type="update">
         Upgraded to Committer version 1.2.0 and refactored code accordingly.
       </action>
-      <action dev="essiembp" type="update">
+      <action dev="essiembre" type="update">
         "batchSize configuration option has been renamed to "queueSize".
         "solrBatchSize" configuration options has been renamed to 
         "committerBatchSize".
