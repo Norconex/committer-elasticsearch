@@ -30,6 +30,7 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.NullInputStream;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
@@ -79,6 +80,13 @@ public class ElasticsearchCommitterTest {
 
         queue = tempFolder.newFolder("queue");
         committer.setQueueDir(queue.toString());
+  
+        //We force to wait for an active shard here to help prevent timeout 
+        //that sometimes occur, especially with the first test run.
+        //See http://elasticsearch-users.115913.n3.nabble.com/
+        //Junit-issue-with-node-local-No-shard-available-td3808957.html
+        node.client().admin().cluster().health(new ClusterHealthRequest(
+                "lists").waitForActiveShards(1)).actionGet();
     }
 
     @Test
