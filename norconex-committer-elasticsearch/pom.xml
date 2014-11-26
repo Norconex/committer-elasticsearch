@@ -355,7 +355,7 @@
 		</plugins>
 	</reporting>
 
-	<url>http://norconex.com/product/committer-elasticsearch/apidocs</url>
+	<url>http://www.norconex.com/collectors/committer-elasticsearch</url>
 	<organization>
 		<name>Norconex Inc.</name>
 		<url>http://www.norconex.com</url>

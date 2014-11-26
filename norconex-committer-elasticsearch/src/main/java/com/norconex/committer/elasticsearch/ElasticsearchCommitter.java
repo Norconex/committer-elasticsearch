@@ -67,7 +67,7 @@ import com.norconex.commons.lang.map.Properties;
  *         Once re-mapped, this metadata source field is 
  *         deleted, unless "keep" is set to <code>true</code>.)
  *      &lt;/sourceReferenceField&gt;
- *      &lt;sourceContentField keep="[false|true]"&gt
+ *      &lt;sourceContentField keep="[false|true]"&gt;
  *         (If you wish to use a metadata field to act as the document 
  *         "content", you can specify that field here.  Default 
  *         does not take a metadata field but rather the document content.
