@@ -30,11 +30,13 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.NullInputStream;
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,6 +54,8 @@ public class ElasticsearchCommitterTest {
     private ElasticsearchCommitter committer;
 
     private Client client;
+    
+    private Node node;
 
     private String indexName = "crawl";
 
@@ -62,8 +66,14 @@ public class ElasticsearchCommitterTest {
     @Before
     public void setup() throws Exception {
 
+        Settings settings = ImmutableSettings.settingsBuilder()
+                .put("index.number_of_shards", 1)
+                .put("index.number_of_replicas", 1)
+                .put("path.data", tempFolder.newFolder().toString())
+                .build();
+        
         // Create a local client
-        Node node = nodeBuilder().local(true).node();
+        node = nodeBuilder().local(true).settings(settings).node();
         client = node.client();
 
         committer = new ElasticsearchCommitter(new IClientFactory() {
@@ -80,13 +90,11 @@ public class ElasticsearchCommitterTest {
 
         queue = tempFolder.newFolder("queue");
         committer.setQueueDir(queue.toString());
-  
-        //We force to wait for an active shard here to help prevent timeout 
-        //that sometimes occur, especially with the first test run.
-        //See http://elasticsearch-users.115913.n3.nabble.com/
-        //Junit-issue-with-node-local-No-shard-available-td3808957.html
-        node.client().admin().cluster().health(new ClusterHealthRequest(
-                "lists").waitForActiveShards(1)).actionGet();
+    }
+    
+    @After
+    public void tearDown() throws Exception {
+        node.close();
     }
 
     @Test
