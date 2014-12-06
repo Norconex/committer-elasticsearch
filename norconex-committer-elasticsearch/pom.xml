@@ -279,7 +279,7 @@
 	<distributionManagement>
 		<site>
 			<id>norconex-site-deployment</id>
-			<url>${site.baseurl}/committer-elasticsearch/latest</url>
+			<url>${site.baseurl}/collectors/committer-elasticsearch/latest</url>
 		</site>
         <snapshotRepository>
           <id>ossrh</id>
