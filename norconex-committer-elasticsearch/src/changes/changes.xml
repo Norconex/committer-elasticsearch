@@ -7,16 +7,20 @@
   </properties>
   <body>
 
-    <release version="2.0.1-SNAPSHOT" date="201?-??-??" description="Maintenance release">
+    <release version="2.0.1" date="2015-03-31" description="Maintenance release">
       <action dev="dimassip" type="fix">
         Fixed unstable unit tests.
       </action>
       <action dev="essiembre" type="update">
-        Upgraded Norconex Committer Core to 2.0.1.
+        Updated several maven plugins and added SonarQube maven plugin.
+      </action>
+      <action dev="essiembre" type="update">
+        Library updates: Elasticsearch API 1.5.0, Norconex Committer Core 2.0.1,
+        JUnit 4.12, Apache Commons Codec 1.10.
       </action>
       <action dev="essiembre" type="update">
         Added Sonatype repository to pom.xml for snapshot releases.
-      </action>      
+      </action>
     </release>
 
     <release version="2.0.0" date="2014-11-25" description="Major release">
