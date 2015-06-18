@@ -7,6 +7,12 @@
   </properties>
   <body>
 
+    <release version="2.0.2" date="2015-??-??" description="Bug fix release">
+      <action dev="dimassip" type="fix">
+        Fixed not handling array values properly.
+      </action>
+    </release>
+
     <release version="2.0.1" date="2015-03-31" description="Maintenance release">
       <action dev="dimassip" type="fix">
         Fixed unstable unit tests.
