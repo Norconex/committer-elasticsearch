@@ -236,10 +236,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
             if (!isKeepSourceReferenceField() && key.equals(getSourceReferenceField())) {
                 continue;
             }
-            List<String> values = fields.getStrings(key);
-            for (String value : values) {
-                builder.field(key, value);
-            }
+            builder.field(key, fields.getStrings(key));
         }
         return builder.endObject();
     }
