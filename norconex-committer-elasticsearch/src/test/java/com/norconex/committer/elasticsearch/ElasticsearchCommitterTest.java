@@ -125,6 +125,7 @@ public class ElasticsearchCommitterTest {
     /**
      * This test will sometime fail.
      * TODO investigate why
+     * @throws Exception something wrong...
      */
     @Test
     @Ignore
