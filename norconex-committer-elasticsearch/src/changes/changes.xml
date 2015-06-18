@@ -7,7 +7,7 @@
   </properties>
   <body>
 
-    <release version="2.0.2" date="2015-??-??" description="Bug fix release">
+    <release version="2.0.2-SNAPSHOT" date="2015-??-??" description="Bug fix release">
       <action dev="dimassip" type="fix">
         Fixed not handling array values properly.
       </action>
