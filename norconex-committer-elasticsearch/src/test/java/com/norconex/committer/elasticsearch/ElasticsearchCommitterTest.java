@@ -34,7 +34,6 @@ import org.apache.commons.io.input.NullInputStream;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.junit.After;
@@ -67,10 +66,10 @@ public class ElasticsearchCommitterTest {
     @Before
     public void setup() throws Exception {
 
-        Settings settings = ImmutableSettings.settingsBuilder()
+        Settings settings = Settings.settingsBuilder()
                 .put("index.number_of_shards", 1)
                 .put("index.number_of_replicas", 1)
-                .put("path.data", tempFolder.newFolder().toString())
+                .put("path.home", tempFolder.newFolder().toString())
                 .build();
         
         // Create a local client
@@ -121,11 +120,6 @@ public class ElasticsearchCommitterTest {
                 ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD)).get(0));
     }
 
-    /**
-     * This test will sometime fail.
-     * TODO investigate why
-     * @throws Exception something wrong...
-     */
     @Test
     public void testCommitDelete() throws Exception {
 

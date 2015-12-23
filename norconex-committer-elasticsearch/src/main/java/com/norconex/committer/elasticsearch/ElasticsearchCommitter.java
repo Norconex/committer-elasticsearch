@@ -58,8 +58,22 @@ import com.norconex.commons.lang.map.Properties;
  *      &lt;indexName&gt;(Name of the index to use)&lt;/indexName&gt;
  *      &lt;typeName&gt;(Name of the type to use)&lt;/typeName&gt;
  *      &lt;clusterName&gt;
- *         (Name of the ES cluster. Use if you have multiple clusters.)
+ *         (Name of the ES cluster to join. Default to 'elasticsearch'.)
  *      &lt;/clusterName&gt;
+ *      &lt;clusterHosts nodeClient="[false|true]"&gt;
+ *      	(Comma delimited list of hosts to connect to join the cluster. 
+ *      	Default to localhost only. If "nodeClient" is true (the default), the
+ *      	client connection will be done using the ES Node Client. If 
+ *      	false, it will use the ES Transport Client. When using the Node Client
+ *      	and connecting to a ES cluster not on localhost, the local port 9300
+ *      	must be accessible to outside hosts. If this is not possible because
+ *      	of firewall issues, the Transport Client should be used.)
+ *      &lt;/clusterHosts&gt;
+ *      &lt;bindIp&gt;
+ *         (Set the IP address the client will bind to. Default to localhost. It is 
+ *          necessary to set this when using the node client and when connecting to a ES 
+ *          cluster not on localhost.)
+ *      &lt;/bindIp&gt;
  *      &lt;sourceReferenceField keep="[false|true]"&gt;
  *         (Optional name of field that contains the document reference, when 
  *         the default document reference is not used.  The reference value
@@ -101,6 +115,9 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     private final IClientFactory clientFactory;
     private Client client;
     private String clusterName;
+    private String clusterHosts;
+    private boolean useNodeClient = true;
+    private String bindIp;
     private String indexName;
     private String typeName;
 
@@ -139,6 +156,48 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     }
 
     /**
+	 * @return the clusterHosts
+	 */
+	public String getClusterHosts() {
+		return clusterHosts;
+	}
+
+	/**
+	 * @param clusterHosts the clusterHosts to set
+	 */
+	public void setClusterHosts(String clusterHosts) {
+		this.clusterHosts = clusterHosts;
+	}
+
+	/**
+	 * @return the useNodeClient
+	 */
+	public boolean isUseNodeClient() {
+		return useNodeClient;
+	}
+
+	/**
+	 * @param useNodeClient the useNodeClient to set
+	 */
+	public void setUseNodeClient(boolean useNodeClient) {
+		this.useNodeClient = useNodeClient;
+	}
+
+	/**
+	 * @return the bindIp
+	 */
+	public String getBindIp() {
+		return bindIp;
+	}
+
+	/**
+	 * @param bindIp the bindIp to set
+	 */
+	public void setBindIp(String bindIp) {
+		this.bindIp = bindIp;
+	}
+
+	/**
      * Gets the index name.
      * @return index name
      */
@@ -236,7 +295,12 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
             if (!isKeepSourceReferenceField() && key.equals(getSourceReferenceField())) {
                 continue;
             }
-            builder.field(key, fields.getStrings(key));
+            
+            // Elasticsearch 2: you can no longer create fields with dots in 
+            // the name (https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking_20_mapping_changes.html#_field_names_may_not_contain_dots). 
+            // So they are replaced by '_'.
+            String replaced = key.replaceAll("\\.", "_");
+            builder.field(replaced, fields.getStrings(key));
         }
         return builder.endObject();
     }
@@ -276,17 +340,37 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     @Override
     protected void saveToXML(XMLStreamWriter writer) throws XMLStreamException {
 
-        writer.writeStartElement("clusterName");
-        writer.writeCharacters(clusterName);
-        writer.writeEndElement();
+    	if (StringUtils.isNotBlank(clusterName)) {
+	    	writer.writeStartElement("clusterName");
+	        writer.writeCharacters(clusterName);
+	        writer.writeEndElement();
+    	}
+        
+        if (StringUtils.isNotBlank(clusterHosts)) {
+            writer.writeStartElement("clusterHosts");
+            writer.writeAttribute(
+                    "nodeClient", Boolean.toString(useNodeClient));
+            writer.writeCharacters(clusterHosts);
+            writer.writeEndElement();
+        }
+        
+        if (StringUtils.isNotBlank(bindIp)) {
+	    	writer.writeStartElement("bindIp");
+	        writer.writeCharacters(bindIp);
+	        writer.writeEndElement();
+    	}
 
-        writer.writeStartElement("indexName");
-        writer.writeCharacters(indexName);
-        writer.writeEndElement();
+        if (StringUtils.isNotBlank(indexName)) {
+	        writer.writeStartElement("indexName");
+	        writer.writeCharacters(indexName);
+	        writer.writeEndElement();
+        }
 
-        writer.writeStartElement("typeName");
-        writer.writeCharacters(typeName);
-        writer.writeEndElement();
+        if (StringUtils.isNotBlank(typeName)) {
+        	writer.writeStartElement("typeName");
+	        writer.writeCharacters(typeName);
+	        writer.writeEndElement();
+        }
     }
 
     @Override
@@ -302,6 +386,9 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
             setTargetContentField(DEFAULT_ES_CONTENT_FIELD);
         }
         setClusterName(xml.getString("clusterName", null));
+        setClusterHosts(xml.getString("clusterHosts", null));
+        setUseNodeClient(xml.getBoolean("clusterHosts[@nodeClient]", useNodeClient));
+        setBindIp(xml.getString("bindIp", null));
         setIndexName(xml.getString("indexName", null));
         setTypeName(xml.getString("typeName", null));
     }

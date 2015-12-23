@@ -7,6 +7,12 @@
   </properties>
   <body>
 
+    <release version="2.1.0" date="TBD" description="Maintenance release">
+      <action dev="dimassip" type="update">
+        Upgraded to Elasticsearch 2.1.0
+      </action>
+    </release>
+    
     <release version="2.0.2" date="2015-12-23" description="Maintenance release">
       <action dev="dimassip" type="update">
         Upgraded to Elasticsearch 1.7.4
