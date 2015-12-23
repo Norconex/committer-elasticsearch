@@ -39,7 +39,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -128,7 +127,6 @@ public class ElasticsearchCommitterTest {
      * @throws Exception something wrong...
      */
     @Test
-    @Ignore
     public void testCommitDelete() throws Exception {
 
         // Add a document directly to ES
