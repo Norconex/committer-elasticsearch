@@ -7,7 +7,10 @@
   </properties>
   <body>
 
-    <release version="2.0.2-SNAPSHOT" date="2015-??-??" description="Bug fix release">
+    <release version="2.0.2" date="2015-12-23" description="Maintenance release">
+      <action dev="dimassip" type="update">
+        Upgraded to Elasticsearch 1.7.4
+      </action>
       <action dev="dimassip" type="fix">
         Fixed not handling array values properly.
       </action>
