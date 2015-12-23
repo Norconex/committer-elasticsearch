@@ -34,12 +34,10 @@ import org.apache.commons.io.input.NullInputStream;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -68,10 +66,10 @@ public class ElasticsearchCommitterTest {
     @Before
     public void setup() throws Exception {
 
-        Settings settings = ImmutableSettings.settingsBuilder()
+        Settings settings = Settings.settingsBuilder()
                 .put("index.number_of_shards", 1)
                 .put("index.number_of_replicas", 1)
-                .put("path.data", tempFolder.newFolder().toString())
+                .put("path.home", tempFolder.newFolder().toString())
                 .build();
         
         // Create a local client
@@ -128,7 +126,7 @@ public class ElasticsearchCommitterTest {
      * @throws Exception something wrong...
      */
     @Test
-    @Ignore
+//    @Ignore
     public void testCommitDelete() throws Exception {
 
         // Add a document directly to ES
