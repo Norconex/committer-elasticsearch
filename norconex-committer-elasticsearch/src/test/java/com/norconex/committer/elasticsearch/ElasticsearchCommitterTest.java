@@ -31,6 +31,7 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.NullInputStream;
+import org.apache.commons.lang3.CharEncoding;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
@@ -100,7 +101,7 @@ public class ElasticsearchCommitterTest {
     @Test
     public void testCommitAdd() throws Exception {
         String content = "hello world!";
-        InputStream is = IOUtils.toInputStream(content);
+        InputStream is = IOUtils.toInputStream(content, CharEncoding.UTF_8);
 
         // Add new doc to ES
         String id = "1";
@@ -200,7 +201,7 @@ public class ElasticsearchCommitterTest {
     public void testSetSourceReferenceField() throws Exception {
 
         String content = "hello world!";
-        InputStream is = IOUtils.toInputStream(content);
+        InputStream is = IOUtils.toInputStream(content, CharEncoding.UTF_8);
 
         // Force to use a reference field instead of the default
         // reference ID.
@@ -236,7 +237,7 @@ public class ElasticsearchCommitterTest {
     public void testKeepIdSourceField() throws Exception {
 
         String content = "hello world!";
-        InputStream is = IOUtils.toInputStream(content);
+        InputStream is = IOUtils.toInputStream(content, CharEncoding.UTF_8);
 
         // Force to use a reference field instead of the default
         // reference ID.
@@ -328,7 +329,7 @@ public class ElasticsearchCommitterTest {
     public void testCustomtargetContentField() throws Exception {
 
         String content = "hello world!";
-        InputStream is = IOUtils.toInputStream(content);
+        InputStream is = IOUtils.toInputStream(content, CharEncoding.UTF_8);
         
         String targetContentField = "customContent";
         Properties metadata = new Properties();

@@ -7,9 +7,14 @@
   </properties>
   <body>
 
-    <release version="2.0.3-SNAPSHOT" date="2016-??-??" description="Maintenance release">
+    <release version="2.1.0" date="2016-08-29" description="Feature release">
+      <action dev="essiembre" type="add">
+        Now ships with new install script that automates copying of dependent 
+        libraries, taking into account possible version conflicts.
+      </action>
       <action dev="dimassip" type="update">
-        Upgraded to Elasticsearch 2.1.0
+        Upgraded to Elasticsearch 2.3.5, Norconex Committer Core 2.0.5,
+        Norconex Commons Lang 1.12.0, Apache Commons Lang 2.6.
       </action>
     </release>
     
