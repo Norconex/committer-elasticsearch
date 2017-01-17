@@ -7,6 +7,28 @@
   </properties>
   <body>
 
+    <release version="3.0.0-SNAPSHOT" date="2017-??-??" description="Major release">
+      <action dev="essiembre" type="update">
+        Upgraded to support Elasticsearch 5.1.2 (but shoudl work with other 5.x
+        versions). May not work with Elasticsearch 2.x.
+      </action>
+      <action dev="essiembre" type="update">
+        Dot in field names are no longer converted to underscores
+        (since ES 5.x now supports them).
+      </action>
+      <action dev="essiembre" type="update">
+        Now requires Java 8+ to run (Elasticsearch requirement).
+      </action>
+      <action dev="essiembre" type="update">
+        Now includes new required dependencies: Apache Logging Log4J Api/Core 2.7.
+      </action>
+      <action dev="essiembre" type="remove">
+        Connecting via Node Client is no longer supported.  Only transport
+        client is now supported (node client is not officially supported by 
+        Elasticsearch).
+      </action>
+    </release>
+
     <release version="2.1.0" date="2016-08-29" description="Feature release">
       <action dev="essiembre" type="add">
         Now ships with new install script that automates copying of dependent 

@@ -1,5 +1,5 @@
 <!--
-   Copyright 2013-2015 Norconex Inc.
+   Copyright 2013-2017 Norconex Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.norconex.collectors</groupId>
   <artifactId>norconex-committer-elasticsearch</artifactId>
-  <version>2.1.0</version>
+  <version>3.0.0-SNAPSHOT</version>
   <name>Norconex Committer Elasticsearch</name>
   <description>Elasticsearch implementation of Norconex Committer.</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>    
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>    
     <site.baseurl />
   </properties>
   <inceptionYear>2013</inceptionYear>
@@ -53,25 +53,35 @@
 
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <groupId>org.elasticsearch.client</groupId>
+      <artifactId>transport</artifactId>
+      <version>5.1.2</version>
     </dependency>
     <dependency>
-      <groupId>org.elasticsearch</groupId>
-      <artifactId>elasticsearch</artifactId>
-      <version>2.3.5</version>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.7</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.7</version>
     </dependency>
     <dependency>
       <groupId>com.norconex.collectors</groupId>
       <artifactId>norconex-committer-core</artifactId>
       <version>2.0.5</version>
     </dependency>
+    
+    <!-- For testing only (includes JUnit): 
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.10</version>
+      <groupId>org.elasticsearch.test</groupId>
+      <artifactId>framework</artifactId>
+      <version>5.1.2</version>
+      <scope>test</scope>
     </dependency>
+    -->
+    
   </dependencies>
 
   <dependencyManagement>
@@ -167,9 +177,9 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.2</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
-                    <encoding>UTF-8</encoding>
+          <source>1.8</source>
+          <target>1.8</target>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
         <plugin>
@@ -218,7 +228,7 @@
           <overview>${basedir}/src/main/javadoc/overview.html</overview>
           <show>protected</show>
           <nodeprecated>false</nodeprecated>
-          <source>1.7</source>
+          <source>1.8</source>
           <detectLinks>false</detectLinks>
           <links>
             <link>https://www.norconex.com/product/commons-lang/apidocs/</link>
@@ -391,7 +401,7 @@
           </footer>
           <show>protected</show>
           <nodeprecated>false</nodeprecated>
-          <source>1.7</source>
+          <source>1.8</source>
           <detectLinks>false</detectLinks>          
           <links>
             <link>https://www.norconex.com/product/commons-lang/apidocs/</link>
