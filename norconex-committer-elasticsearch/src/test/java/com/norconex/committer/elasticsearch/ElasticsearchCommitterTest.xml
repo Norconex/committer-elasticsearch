@@ -16,7 +16,7 @@
    limitations under the License.
 -->
 
-<committer class="com.norconex.committer.cloudsearch.CloudSearchCommitter">
+<committer class="com.norconex.committer.cloudsearch.ElasticsearchCommitterTest">
   <indexName>index</indexName>
   <typeName>type</typeName>
   <clusterName>cluster name</clusterName>
