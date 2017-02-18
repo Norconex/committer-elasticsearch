@@ -8,6 +8,13 @@
   <body>
 
     <release version="3.0.0-SNAPSHOT" date="2017-??-??" description="Major release">
+      <action dev="essiembre" type="add">
+        Added schema-based XML configuration validation.
+      </action>
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Norconex Commons Lang 1.13.0,
+        Norconex Committer Core 2.0.6.
+      </action>
       <action dev="essiembre" type="update">
         Upgraded to support Elasticsearch 5.1.2 (but shoudl work with other 5.x
         versions). May not work with Elasticsearch 2.x.
@@ -20,7 +27,8 @@
         Now requires Java 8+ to run (Elasticsearch requirement).
       </action>
       <action dev="essiembre" type="update">
-        Now includes new required dependencies: Apache Logging Log4J Api/Core 2.7.
+        Now includes new required dependencies: Apache Logging Log4J 
+        Api/Core 2.7.
       </action>
       <action dev="essiembre" type="remove">
         Connecting via Node Client is no longer supported.  Only transport

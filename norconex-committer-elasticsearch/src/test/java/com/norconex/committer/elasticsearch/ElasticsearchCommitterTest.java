@@ -14,6 +14,18 @@
  */
 package com.norconex.committer.elasticsearch;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.log4j.Level;
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.norconex.commons.lang.config.XMLConfigurationUtil;
+import com.norconex.commons.lang.log.CountingConsoleAppender;
+
 //https://www.elastic.co/guide/en/elasticsearch/reference/current/integration-tests.html
 // 
 // UNCOMMENT TO TEST, after uncommenting in pom.xml as well
@@ -158,22 +170,24 @@ public class ElasticsearchCommitterTest { // extends ESIntegTestCase {
 //        }
 //    }
 //
-//    @Test
-//    public void testWriteRead() throws Exception {
-//        committer.setQueueDir("my-queue-dir");
-//        committer.setSourceContentField("sourceContentField");
-//        committer.setTargetContentField("targetContentField");
-//        committer.setSourceReferenceField("idField");
-//        committer.setKeepSourceContentField(true);
-//        committer.setKeepSourceReferenceField(false);
-//        committer.setQueueSize(10);
-//        committer.setCommitBatchSize(1);
-//        committer.setClusterName("my-cluster");
-//        committer.setIndexName("my-inxed");
-//        committer.setTypeName("my-type");
-//
-//        ConfigurationUtil.assertWriteRead(committer);
-//    }
+    @Test
+    public void testWriteRead() throws Exception {
+        ElasticsearchCommitter committer = new ElasticsearchCommitter();
+        committer.setQueueDir("my-queue-dir");
+        committer.setSourceContentField("sourceContentField");
+        committer.setTargetContentField("targetContentField");
+        committer.setSourceReferenceField("idField");
+        committer.setKeepSourceContentField(true);
+        committer.setKeepSourceReferenceField(false);
+        committer.setQueueSize(10);
+        committer.setCommitBatchSize(1);
+        committer.setClusterName("my-cluster");
+        committer.setIndexName("my-inxed");
+        committer.setTypeName("my-type");
+
+        System.out.println("Writing/Reading this: " + committer);
+        XMLConfigurationUtil.assertWriteRead(committer);
+    }
 //    
 //    @Test
 //    public void testSetSourceReferenceField() throws Exception {
@@ -356,4 +370,18 @@ public class ElasticsearchCommitterTest { // extends ESIntegTestCase {
 //        assertEquals(((List<?>) source.get(fieldname)).size(), 3);
 //	}
 
+    
+    @Test
+    public void testValidation() throws IOException {
+        CountingConsoleAppender appender = new CountingConsoleAppender();
+        appender.startCountingFor(XMLConfigurationUtil.class, Level.WARN);
+        try (Reader r = new InputStreamReader(getClass().getResourceAsStream(
+                ClassUtils.getShortClassName(getClass()) + ".xml"))) {
+            XMLConfigurationUtil.loadFromXML(new ElasticsearchCommitter(), r);
+        } finally {
+            appender.stopCountingFor(XMLConfigurationUtil.class);
+        }
+        Assert.assertEquals("Validation warnings/errors were found.", 
+                0, appender.getCount());
+    }
 }
