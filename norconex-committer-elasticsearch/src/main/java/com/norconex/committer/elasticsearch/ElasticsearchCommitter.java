@@ -44,6 +44,7 @@ import com.norconex.committer.core.IAddOperation;
 import com.norconex.committer.core.ICommitOperation;
 import com.norconex.committer.core.IDeleteOperation;
 import com.norconex.commons.lang.map.Properties;
+import com.norconex.commons.lang.time.DurationParser;
 
 /**
  * <p>
@@ -53,7 +54,12 @@ import com.norconex.commons.lang.map.Properties;
  * Despite being a subclass
  * of {@link AbstractMappedCommitter}, setting an <code>idTargetField</code>
  * is not supported.
- * </p>  
+ * </p>
+ * <p>
+ * As of 3.0.0, XML configuration entries expecting millisecond durations
+ * can be provided in human-readable format (English only), as per 
+ * {@link DurationParser} (e.g., "5 minutes and 30 seconds" or "5m30s").
+ * </p> 
  * <h3>XML configuration usage:</h3>
  * 
  * <pre>
@@ -91,7 +97,7 @@ import com.norconex.commons.lang.map.Properties;
  *      &lt;queueDir&gt;(optional path where to queue files)&lt;/queueDir&gt;
  *      &lt;queueSize&gt;(max queue size before committing)&lt;/queueSize&gt;
  *      &lt;maxRetries&gt;(max retries upon commit failures)&lt;/maxRetries&gt;
- *      &lt;maxRetryWait&gt;(max delay between retries)&lt;/maxRetryWait&gt;
+ *      &lt;maxRetryWait&gt;(max delay in milliseconds between retries)&lt;/maxRetryWait&gt;
  *  &lt;/committer&gt;
  * </pre>
  * 
