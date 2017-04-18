@@ -11,6 +11,9 @@
       <action dev="essiembre" type="add">
         Added schema-based XML configuration validation.
       </action>
+      <action dev="essiembre" type="add">
+        Now distributed with utility scripts.
+      </action>
       <action dev="essiembre" type="update">
         XML configuration entries expecting millisecond durations
         can now be provided in human-readable format 

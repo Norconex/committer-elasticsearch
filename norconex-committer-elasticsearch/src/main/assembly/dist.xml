@@ -1,5 +1,5 @@
 <!-- 
-   Copyright 2010-2014 Norconex Inc.
+   Copyright 2010-2017 Norconex Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,13 +24,6 @@
 
   <fileSets>
     <fileSet>
-      <directory>${basedir}/src/main/scripts</directory>
-      <includes>
-        <include>**</include>
-      </includes>
-      <outputDirectory>/</outputDirectory>
-    </fileSet>  
-    <fileSet>
       <directory>${basedir}/src/main/assembly/</directory>
       <includes>
         <include>*.txt</include>
@@ -44,6 +37,14 @@
     <fileSet>
       <directory>${project.build.directory}/generated-resources</directory>
       <outputDirectory>third-party</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/shared-resources</directory>
+      <excludes>
+        <exclude>scripts/decrypt*</exclude>
+        <exclude>scripts/encrypt*</exclude>
+      </excludes>
+      <outputDirectory>/</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.build.directory}/generated-sources/license</directory>
