@@ -24,7 +24,7 @@
         Norconex Committer Core 2.0.6.
       </action>
       <action dev="essiembre" type="update">
-        Upgraded to support Elasticsearch 5.1.2 (but shoudl work with other 5.x
+        Upgraded to support Elasticsearch 5.3.1 (but should work with other 5.x
         versions). May not work with Elasticsearch 2.x.
       </action>
       <action dev="essiembre" type="update">
