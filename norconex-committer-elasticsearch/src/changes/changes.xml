@@ -7,7 +7,7 @@
   </properties>
   <body>
 
-    <release version="3.0.0-SNAPSHOT" date="2017-??-??" description="Major release">
+    <release version="3.0.0" date="2017-04-25" description="Major release">
       <action dev="essiembre" type="add">
         Added schema-based XML configuration validation.
       </action>
@@ -20,12 +20,12 @@
         (e.g., "5 minutes and 30 seconds" or "5m30s").
       </action>      
       <action dev="essiembre" type="update">
-        Maven dependency updates: Norconex Commons Lang 1.13.0,
-        Norconex Committer Core 2.0.6.
-      </action>
-      <action dev="essiembre" type="update">
         Upgraded to support Elasticsearch 5.3.1 (but should work with other 5.x
         versions). May not work with Elasticsearch 2.x.
+      </action>
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Norconex Commons Lang 1.13.0,
+        Norconex Committer Core 2.1.0.
       </action>
       <action dev="essiembre" type="update">
         Dot in field names are no longer converted to underscores
