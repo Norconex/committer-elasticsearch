@@ -7,6 +7,38 @@
   </properties>
   <body>
 
+    <release version="4.0.0-SNAPSHOT" date="2017-??-?" description="Major release">
+      <action dev="essiembre" type="add">
+        Now uses Elasticsearch REST API (client version 5.4.0).
+      </action>
+      <action dev="essiembre" type="add">
+        Added basic authentication support for password-protected clusters.
+      </action>
+      <action dev="essiembre" type="add">
+        New "ignoreResponseErrors" flag to log errors from a node response
+        as opposed to throw an exception.
+      </action>
+      <action dev="essiembre" type="add">
+        New "discoverNodes" flag to automatically discover nodes in a cluster
+        beyond those defined explicitly.
+      </action>
+      <action dev="essiembre" type="add">
+        Now ships with encrypt utility scripts.
+      </action>
+      <action dev="essiembre" type="update">
+        Dots are no longer replaced with underscore by default. Now 
+        configurable with "dotReplacement" option.
+      </action>
+      <action dev="essiembre" type="update">
+        The "clusterName" and "clusterHosts" configuration options were
+        replaced with "nodes".
+      </action>
+      <action dev="essiembre" type="remove">
+        Removed support for Elasticsearch Transport Client.  Elasticsearch
+        will eventually drop support for it in favor of the REST API.
+      </action>
+    </release>
+
     <release version="3.0.0" date="2017-04-25" description="Major release">
       <action dev="essiembre" type="add">
         Added schema-based XML configuration validation.

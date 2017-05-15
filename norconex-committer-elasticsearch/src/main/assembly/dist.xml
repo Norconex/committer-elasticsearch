@@ -40,10 +40,6 @@
     </fileSet>
     <fileSet>
       <directory>${project.build.directory}/shared-resources</directory>
-      <excludes>
-        <exclude>scripts/decrypt*</exclude>
-        <exclude>scripts/encrypt*</exclude>
-      </excludes>
       <outputDirectory>/</outputDirectory>
     </fileSet>
     <fileSet>

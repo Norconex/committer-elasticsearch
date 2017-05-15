@@ -23,10 +23,25 @@
       <xs:complexContent> 
         <xs:extension base="AbstractMappedCommitter">
           <xs:all>
+            <xs:element name="nodes" type="nonEmptyString" minOccurs="0" maxOccurs="1" />
             <xs:element name="indexName" type="nonEmptyString" minOccurs="1" maxOccurs="1" />
             <xs:element name="typeName" type="nonEmptyString" minOccurs="1" maxOccurs="1" />
-            <xs:element name="clusterName" type="nonEmptyString" minOccurs="0" maxOccurs="1" />
-            <xs:element name="clusterHosts" type="nonEmptyString" minOccurs="0" maxOccurs="1" />
+            <xs:element name="ignoreResponseErrors" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+            <xs:element name="discoverNodes" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+            <xs:element name="dotReplacement" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="username" type="nonEmptyString" minOccurs="0" maxOccurs="1" />
+            <xs:element name="password" type="nonEmptyString" minOccurs="0" maxOccurs="1" />
+            <xs:element name="passwordKey" type="nonEmptyString" minOccurs="0" maxOccurs="1" />
+            <xs:element name="passwordKeySource" minOccurs="0" maxOccurs="1">
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="key"/>
+                  <xs:enumeration value="file"/>
+                  <xs:enumeration value="environment"/>
+                  <xs:enumeration value="property"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
           </xs:all>
         </xs:extension> 
       </xs:complexContent>

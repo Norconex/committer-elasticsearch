@@ -16,11 +16,18 @@
    limitations under the License.
 -->
 
-<committer class="com.norconex.committer.elasticsearch.ElasticsearchCommitterTest">
+<committer class="com.norconex.committer.elasticsearch.ElasticsearchCommitter">
   <indexName>index</indexName>
   <typeName>type</typeName>
-  <clusterName>cluster name</clusterName>
-  <clusterHosts>host1, host2</clusterHosts>
+  <nodes>host1, host2</nodes>
+  <ignoreResponseErrors>true</ignoreResponseErrors>
+  <discoverNodes>true</discoverNodes>
+  <dotReplacement>_</dotReplacement>
+  <username>username</username>
+  <password>password</password>
+  <passwordKey>encryptionkey</passwordKey>
+  <passwordKeySource>property</passwordKeySource>
+  
   <sourceReferenceField keep="true">sourceReferenceField</sourceReferenceField>
   <!-- This element is not supported by ElasticsearchCommitter:
   <targetReferenceField></targetReferenceField>

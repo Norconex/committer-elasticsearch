@@ -14,374 +14,357 @@
  */
 package com.norconex.committer.elasticsearch;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.util.Collections;
 
-import org.apache.commons.lang3.ClassUtils;
-import org.apache.log4j.Level;
-import org.junit.Assert;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.NullInputStream;
+import org.apache.commons.lang3.CharEncoding;
+import org.apache.http.HttpHost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.ResponseException;
+import org.elasticsearch.client.RestClient;
+import org.json.JSONObject;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
-import com.norconex.commons.lang.config.XMLConfigurationUtil;
-import com.norconex.commons.lang.log.CountingConsoleAppender;
+import com.norconex.commons.lang.map.Properties;
 
-//https://www.elastic.co/guide/en/elasticsearch/reference/current/integration-tests.html
-// 
-// UNCOMMENT TO TEST, after uncommenting in pom.xml as well
-// 
-// Some IDEs will include test scoped dependencies on classpath when running
-// normally from IDE (not testing) and will fail since 
-//com.carrotsearch.randomizedtesting.RandomizedContext will be on classpath.
-// When that occurs, this exception is thrown: "java.lang.IllegalStateException: 
-//     running tests but failed to invoke RandomizedContext#getRandom".
-//
-// Uncomment this class for good when no longer an issue in a future Elasticsearch
+import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
+import pl.allegro.tech.embeddedelasticsearch.PopularProperties;
 
-public class ElasticsearchCommitterTest { // extends ESIntegTestCase {
+public class ElasticsearchCommitterTest {
 
-//    
-//    @Rule
-//    public TemporaryFolder tempFolder = new TemporaryFolder();
-//
-//    private ElasticsearchCommitter committer;
-//
-//    private String indexName = "crawl";
-//
-//    private String typeName = "page";
-//
-//    private File queue;
-//
-//    @Override
-//    protected int numberOfShards() {
-//        return 1;
-//    }
-//    @Override
-//    protected int numberOfReplicas() {
-//        return 1;
-//    }
-//
-//    @Override
-//    protected Settings nodeSettings(int nodeOrdinal) {
-//        return Settings.builder().put(super.nodeSettings(nodeOrdinal))
-//////                .put("node.mode", "network")
-////                .put("transport.type", "local")
-////                .put("http.enabled", "false")
-//                .build();
-//    }
-//    
-//    @Before
-//    public void setup() throws Exception {
-//        committer = new ElasticsearchCommitter(new IClientFactory() {
-//            @Override
-//            public Client createClient(ElasticsearchCommitter committer) {
-//                return client();//client;
-//            }
-//        });
-//
-//        committer.setIndexName(indexName);
-//        committer.setTypeName(typeName);
-//        committer.setTargetContentField(
-//                ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD);
-//
-//        queue = tempFolder.newFolder("queue");
-//        committer.setQueueDir(queue.toString());
-//    }
-//    
-//    @Test
-//    public void testCommitAdd() throws Exception {
-//        String content = "hello world!";
-//        InputStream is = IOUtils.toInputStream(content, CharEncoding.UTF_8);
-//
-//        // Add new doc to ES
-//        String id = "1";
-//        committer.add(id,  is, new Properties());
-//        committer.commit();
-//
-//        IOUtils.closeQuietly(is);
-//        
-//        // Check that it's in ES
-//        GetResponse response = client().prepareGet(indexName, typeName, id)
-//                .execute().actionGet();
-//        assertTrue(response.isExists());
-//        // Check content
-//        
-//        Map<String, Object> responseMap = response.getSource();
-//        assertEquals(content, ((List<?>) responseMap.get(
-//                ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD)).get(0));
-//    }
-//
-//    @Test
-//    public void testCommitDelete() throws Exception {
-//
-//        // Add a document directly to ES
-//        IndexRequestBuilder request = client().prepareIndex(indexName, typeName);
-//        String id = "1";
-//        request.setId(id);
-//        request.setSource("content", "hello world!");
-//        request.execute();
-//
-//        // Queue it to be deleted
-//        committer.remove(id, new Properties());
-//        committer.commit();
-//
-//        // Check that it's removed from ES
-//        GetResponse response = client().prepareGet(indexName, typeName, id)
-//                .execute().actionGet();
-//        assertFalse(response.isExists());
-//    }
-//
-//    @Test
-//    public void testRemoveQueuedFilesAfterAdd() throws Exception {
-//
-//        // Add new doc to ES
-//        String id = "1";
-//        committer.add(id, new NullInputStream(0), new Properties());
-//        committer.commit();
-//
-//        // After commit, make sure queue is emptied of all files
-//        assertTrue(FileUtils.listFiles(queue, null, true).isEmpty());
-//    }
-//
-//    @Test
-//    public void testRemoveQueuedFilesAfterDelete() throws Exception {
-//
-//        // Add new doc to ES
-//        String id = "1";
-//        committer.remove(id, new Properties());
-//        committer.commit();
-//
-//        // After commit, make sure queue is emptied of all files
-//        assertTrue(FileUtils.listFiles(queue, null, true).isEmpty());
-//    }
-//
-//    @Test
-//    public void testUnsupportedIdTargetField() throws Exception {
-//
-//        String xml = "<committer><targetReferenceField>"
-//                + "newid</targetReferenceField></committer>";
-//        XMLConfiguration config = ConfigurationUtil.newXMLConfiguration(
-//                new StringReader(xml));
-//        try {
-//            committer.loadFromXml(config);
-//            fail("Expected exception because idTargetField is not supported");
-//        } catch (Exception e) {
-//            // Expected
-//        }
-//    }
-//
-    @Test
-    public void testWriteRead() throws Exception {
-        ElasticsearchCommitter committer = new ElasticsearchCommitter();
-        committer.setQueueDir("my-queue-dir");
-        committer.setSourceContentField("sourceContentField");
-        committer.setTargetContentField("targetContentField");
-        committer.setSourceReferenceField("idField");
-        committer.setKeepSourceContentField(true);
-        committer.setKeepSourceReferenceField(false);
-        committer.setQueueSize(10);
-        committer.setCommitBatchSize(1);
-        committer.setClusterName("my-cluster");
-        committer.setIndexName("my-inxed");
-        committer.setTypeName("my-type");
+    private static final Logger LOG = 
+            LogManager.getLogger(ElasticsearchCommitterTest.class);
 
-        System.out.println("Writing/Reading this: " + committer);
-        XMLConfigurationUtil.assertWriteRead(committer);
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
+
+    private static final String TEST_ES_VERSION = "5.4.0";
+    private static final String TEST_INDEX = "tests";
+    private static final String TEST_TYPE = "test";
+    private static final String TEST_ID = "1";
+    private static final String TEST_CONTENT = "This is test content.";
+    private static final String INDEX_ENDPOINT = "/" + TEST_INDEX + "/";
+    private static final String TYPE_ENDPOINT = 
+            INDEX_ENDPOINT + TEST_TYPE + "/";
+    private static final String CONTENT_FIELD = 
+            ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD;
+    
+    private static EmbeddedElastic elastic;
+    private static ElasticsearchCommitter committer;
+    private static RestClient restClient;
+    private static String node;
+    
+    private File queue;
+    
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        elastic = EmbeddedElastic.builder()
+                .withElasticVersion(TEST_ES_VERSION)
+                .withSetting(PopularProperties.CLUSTER_NAME, "test_cluster")
+                .build()
+                .start();
+
+        node = "http://localhost:" + elastic.getHttpPort();
+
+        restClient = RestClient.builder(HttpHost.create(node)).build();
     }
-//    
-//    @Test
-//    public void testSetSourceReferenceField() throws Exception {
-//
-//        String content = "hello world!";
-//        InputStream is = IOUtils.toInputStream(content, CharEncoding.UTF_8);
-//
-//        // Force to use a reference field instead of the default
-//        // reference ID.
-//        String sourceReferenceField = "customId";
-//        committer.setSourceReferenceField(sourceReferenceField);
-//        Properties metadata = new Properties();
-//        String customIdValue = "ABC";
-//        metadata.setString(sourceReferenceField, customIdValue);
-//
-//        // Add new doc to ES with a difference id than the one we
-//        // assigned in source reference field
-//        committer.add("1",  is, metadata);
-//        committer.commit();
-//
-//        IOUtils.closeQuietly(is);
-//        
-//        // Check that it's in ES using the custom ID
-//        GetResponse response = client().prepareGet(
-//                indexName, typeName, customIdValue).execute().actionGet();
-//        assertTrue(response.isExists());
-//        
-//        // Check content
-//        Map<String, Object> responseMap = response.getSource();
-//        assertEquals(content, ((List<?>) responseMap.get(
-//                ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD)).get(0));
-//        
-//        // Check custom id field is removed (default behavior)
-//        assertFalse(response.getSource().containsKey(
-//                sourceReferenceField));
-//    }
-//    
-//    @Test
-//    public void testKeepIdSourceField() throws Exception {
-//
-//        String content = "hello world!";
-//        InputStream is = IOUtils.toInputStream(content, CharEncoding.UTF_8);
-//
-//        // Force to use a reference field instead of the default
-//        // reference ID.
-//        String sourceReferenceField = "customId";
-//        committer.setSourceReferenceField(sourceReferenceField);
-//        Properties metadata = new Properties();
-//        String customIdValue = "ABC";
-//        metadata.setString(sourceReferenceField, customIdValue);
-//
-//        // Add new doc to ES with a difference id than the one we
-//        // assigned in source reference field. Set to keep that 
-//        // field.
-//        committer.setKeepSourceReferenceField(true);
-//        committer.add("1",  is, metadata);
-//        committer.commit();
-//
-//        IOUtils.closeQuietly(is);
-//        
-//        // Check that it's in ES using the custom ID
-//        GetResponse response = client().prepareGet(
-//                indexName, typeName, customIdValue).execute().actionGet();
-//        assertTrue(response.isExists());
-//        
-//        // Check custom id field is NOT removed
-//        assertTrue(response.getSource().containsKey(
-//                sourceReferenceField));
-//    }
-//    
-//    @Test
-//    public void testCustomsourceContentField() throws Exception {
-//        
-//        // Set content from metadata
-//        String content = "hello world!";
-//        String sourceContentField = "customContent";
-//        Properties metadata = new Properties();
-//        metadata.setString(sourceContentField, content);
-//        
-//        // Add new doc to ES. Set a null input stream, because content
-//        // will be taken from metadata. 
-//        String id = "1";
-//        committer.setSourceContentField(sourceContentField);
-//        committer.add(id,  new NullInputStream(0), metadata);
-//        committer.commit();
-//        
-//        // Check that it's in ES
-//        GetResponse response = client().prepareGet(indexName, typeName, id)
-//                .execute().actionGet();
-//        assertTrue(response.isExists());
-//        
-//        // Check content
-//        Map<String, Object> responseMap = response.getSource();
-//        assertEquals(content, ((List<?>) responseMap.get(
-//                ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD)).get(0));
-//        
-//        // Check custom source field is removed (default behavior)
-//        assertFalse(response.getSource().containsKey(
-//                sourceContentField));
-//    }
-//    
-//    @Test
-//    public void testKeepCustomsourceContentField() throws Exception {
-//        
-//        // Set content from metadata
-//        String content = "hello world!";
-//        String sourceContentField = "customContent";
-//        Properties metadata = new Properties();
-//        metadata.setString(sourceContentField, content);
-//        
-//        // Add new doc to ES. Set a null input stream, because content
-//        // will be taken from metadata. Set to keep the source metadata
-//        // field.
-//        String id = "1";
-//        committer.setSourceContentField(sourceContentField);
-//        committer.setKeepSourceContentField(true);
-//        committer.add(id,  new NullInputStream(0), metadata);
-//        committer.commit();
-//        
-//        // Check that it's in ES
-//        GetResponse response = client().prepareGet(indexName, typeName, id)
-//                .execute().actionGet();
-//        assertTrue(response.isExists());
-//        
-//        // Check custom source field is kept
-//        assertTrue(response.getSource().containsKey(
-//                sourceContentField));
-//    }
-//    
-//    @Test
-//    public void testCustomtargetContentField() throws Exception {
-//
-//        String content = "hello world!";
-//        InputStream is = IOUtils.toInputStream(content, CharEncoding.UTF_8);
-//        
-//        String targetContentField = "customContent";
-//        Properties metadata = new Properties();
-//        metadata.setString(targetContentField, content);
-//        
-//        // Add new doc to ES
-//        String id = "1";
-//        committer.setTargetContentField(targetContentField);
-//        committer.add(id, is, metadata);
-//        committer.commit();
-//        
-//        IOUtils.closeQuietly(is);
-//        
-//        // Check that it's in ES
-//        GetResponse response = client().prepareGet(
-//                indexName, typeName, id).execute().actionGet();
-//        assertTrue(response.isExists());
-//        
-//        // Check content is available in custom content target field and
-//        // not in the default field
-//        Map<String, Object> responseMap = response.getSource();
-//        assertEquals(content, 
-//        		((List<?>) responseMap.get(targetContentField)).get(0));
-//        assertNull(responseMap.get(
-//                ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD));
-//    }
-//    
-//    @Test
-//	public void testMultiValueFields() throws Exception {
-//		
-//    	Properties metadata = new Properties();
-//        String fieldname = "multi";
-//		metadata.setString(fieldname, "1", "2", "3");
-//        
-//        String id = "1";
-//        committer.add(id, new NullInputStream(0), metadata);
-//        committer.commit();
-//        
-//        // Check that it's in ES
-//        GetResponse response = client().prepareGet(
-//                indexName, typeName, id).execute().actionGet();
-//        assertTrue(response.isExists());
-//        
-//        // Check multi values are still there
-//        Map<String, Object> source = response.getSource();
-//        assertEquals(((List<?>) source.get(fieldname)).size(), 3);
-//	}
+    
+    @Before
+    public void setup() throws Exception {
+        queue = tempFolder.newFolder("queue");
+        committer = new ElasticsearchCommitter();
+        committer.setQueueDir(queue.toString());
+        committer.setNodes(node);
+        committer.setIndexName(TEST_INDEX);
+        committer.setTypeName(TEST_TYPE);
+    }
+    
+    @After
+    public void tearDown() throws IOException {
+        LOG.debug("Deleting test index");
+        //performIndexRequest("POST", "_flush");
+        performRequest("DELETE", "/" + TEST_INDEX);
+        performRequest("POST", "_flush");
+    }
 
+    @AfterClass
+    public static void afterClass() {
+        committer.close();
+        IOUtils.closeQuietly(restClient);
+        if (elastic != null) {
+            elastic.stop();
+        }
+    }
     
     @Test
-    public void testValidation() throws IOException {
-        CountingConsoleAppender appender = new CountingConsoleAppender();
-        appender.startCountingFor(XMLConfigurationUtil.class, Level.WARN);
-        try (Reader r = new InputStreamReader(getClass().getResourceAsStream(
-                ClassUtils.getShortClassName(getClass()) + ".xml"))) {
-            XMLConfigurationUtil.newInstance(r);
-        } finally {
-            appender.stopCountingFor(XMLConfigurationUtil.class);
+    public void testCommitAdd() throws Exception {
+        // Add new doc to ES
+        try (InputStream is = getContentStream()) {
+            committer.add(TEST_ID, is, new Properties());
+            committer.commit();
         }
-        Assert.assertEquals("Validation warnings/errors were found.", 
-                0, appender.getCount());
+        JSONObject doc = getDocument(TEST_ID); 
+        assertTrue("Not found.", isFound(doc));
+        assertTrue("Bad content.", hasTestContent(doc));
+    }
+
+    @Test
+    public void testCommitDelete() throws Exception {
+        // Add a document directly to ES
+        StringEntity requestEntity = new StringEntity(
+                "{\"" + CONTENT_FIELD + "\":\"" + TEST_CONTENT + "\"}\n",
+                ContentType.APPLICATION_JSON);
+        restClient.performRequest("PUT", TYPE_ENDPOINT + TEST_ID, 
+                Collections.emptyMap(), requestEntity);
+        assertTrue("Not properly added.", isFound(getDocument(TEST_ID)));
+        
+        // Queue it to be deleted
+        committer.remove(TEST_ID, new Properties());
+        committer.commit();
+
+        // Check that it's removed from ES
+        assertFalse("Was not deleted.", isFound(getDocument(TEST_ID)));
+    }
+    
+    @Test
+    public void testRemoveQueuedFilesAfterAdd() throws Exception {
+        // Add new doc to ES
+        committer.add(TEST_ID, new NullInputStream(0), new Properties());
+        committer.commit();
+
+        // After commit, make sure queue is emptied of all files
+        assertTrue(FileUtils.listFiles(queue, null, true).isEmpty());
+    }
+
+    @Test
+    public void testRemoveQueuedFilesAfterDelete() throws Exception {
+        // Add new doc to ES
+        committer.remove(TEST_ID, new Properties());
+        committer.commit();
+
+        // After commit, make sure queue is emptied of all files
+        assertTrue(FileUtils.listFiles(queue, null, true).isEmpty());
+    }
+
+    @Test
+    public void testSetSourceReferenceField() throws Exception {
+        // Force to use a reference field instead of the default
+        // reference ID.
+        String sourceReferenceField = "customId";
+        committer.setSourceReferenceField(sourceReferenceField);
+        Properties metadata = new Properties();
+        String customIdValue = "ABC";
+        metadata.setString(sourceReferenceField, customIdValue);
+
+        // Add new doc to ES with a difference id than the one we
+        // assigned in source reference field
+        try (InputStream is = getContentStream()) {
+            committer.add(TEST_ID, is, metadata);
+            committer.commit();
+        }
+
+        // Check that it's in ES using the custom ID
+        JSONObject doc = getDocument(customIdValue); 
+        assertTrue("Not found.", isFound(doc));
+        assertTrue("Bad content.", hasTestContent(doc));
+        assertFalse("sourceReferenceField was saved.", 
+                doc.getJSONObject("_source").has(sourceReferenceField));
+    }
+    
+    @Test
+    public void testKeepIdSourceField() throws Exception {
+        // Force to use a reference field instead of the default
+        // reference ID.
+        String sourceReferenceField = "customId";
+        committer.setSourceReferenceField(sourceReferenceField);
+        Properties metadata = new Properties();
+        String customIdValue = "ABC";
+        metadata.setString(sourceReferenceField, customIdValue);
+
+        // Add new doc to ES with a difference id than the one we
+        // assigned in source reference field. Set to keep that 
+        // field.
+        committer.setKeepSourceReferenceField(true);
+        try (InputStream is = getContentStream()) {
+            committer.add(TEST_ID, is, metadata);
+            committer.commit();
+        }
+
+        // Check that it's in ES using the custom ID
+        JSONObject doc = getDocument(customIdValue); 
+        assertTrue("Not found.", isFound(doc));
+        assertTrue("Bad content.", hasTestContent(doc));
+        assertTrue("sourceReferenceField was not saved.", 
+                doc.getJSONObject("_source").has(sourceReferenceField));
+    }
+    
+    @Test
+    public void testCustomsourceContentField() throws Exception {
+        
+        // Set content from metadata
+        String sourceContentField = "customContent";
+        Properties metadata = new Properties();
+        metadata.setString(sourceContentField, TEST_CONTENT);
+        
+        // Add new doc to ES. Set a null input stream, because content
+        // will be taken from metadata. 
+        committer.setSourceContentField(sourceContentField);
+        committer.add(TEST_ID, new NullInputStream(0), metadata);
+        committer.commit();
+        
+        // Check that it's in ES
+        JSONObject doc = getDocument(TEST_ID); 
+        assertTrue("Not found.", isFound(doc));
+        assertTrue("Bad content.", hasTestContent(doc));
+        
+        // Check custom source field is removed (default behavior)
+        assertFalse("sourceContentField was saved.", 
+                doc.getJSONObject("_source").has(sourceContentField));
+    }
+    
+    @Test
+    public void testKeepCustomsourceContentField() throws Exception {
+        // Set content from metadata
+        String sourceContentField = "customContent";
+        Properties metadata = new Properties();
+        metadata.setString(sourceContentField, TEST_CONTENT);
+        
+        // Add new doc to ES. Set a null input stream, because content
+        // will be taken from metadata. Set to keep the source metadata
+        // field.
+        committer.setSourceContentField(sourceContentField);
+        committer.setKeepSourceContentField(true);
+        committer.add(TEST_ID, new NullInputStream(0), metadata);
+        committer.commit();
+        
+        // Check that it's in ES
+        JSONObject doc = getDocument(TEST_ID); 
+        assertTrue("Not found.", isFound(doc));
+        assertTrue("Bad content.", hasTestContent(doc));
+        
+        // Check custom source field is kept
+        assertTrue("sourceContentField was not saved.", 
+                doc.getJSONObject("_source").has(sourceContentField));
+    }
+    
+    @Test
+    public void testCustomtargetContentField() throws Exception {
+        String targetContentField = "customContent";
+        Properties metadata = new Properties();
+        metadata.setString(targetContentField, TEST_CONTENT);
+        
+        // Add new doc to ES
+        committer.setTargetContentField(targetContentField);
+        try (InputStream is = getContentStream()) {
+            committer.add(TEST_ID, is, metadata);
+            committer.commit();
+        }
+        
+        // Check that it's in ES
+        JSONObject doc = getDocument(TEST_ID); 
+        assertTrue("Not found.", isFound(doc));
+        
+        // Check content is available in custom content target field and
+        // not in the default field
+        assertEquals("targetContentField was not saved.", TEST_CONTENT, 
+                doc.getJSONObject("_source").getString(targetContentField));
+        assertFalse("Default content field was saved.", 
+                doc.getJSONObject("_source").has(CONTENT_FIELD));
+    }
+    
+    @Test
+	public void testMultiValueFields() throws Exception {
+		
+    	Properties metadata = new Properties();
+        String fieldname = "multi";
+		metadata.setString(fieldname, "1", "2", "3");
+        
+        committer.add(TEST_ID, new NullInputStream(0), metadata);
+        committer.commit();
+        
+        // Check that it's in ES
+        JSONObject doc = getDocument(TEST_ID); 
+        assertTrue("Not found.", isFound(doc));
+        
+        // Check multi values are still there
+        assertEquals("Multi-value not saved properly.", 3, doc.getJSONObject(
+                "_source").getJSONArray(fieldname).toList().size());
+	}
+
+    @Test
+    public void testDotReplacement() throws Exception {
+        Properties metadata = new Properties();
+        String fieldNameDots = "with.dots.";
+        String fieldNameNoDots = "with_dots_";
+        String fieldValue = "some value";
+        metadata.setString(fieldNameDots, fieldValue);
+
+        committer.setDotReplacement("_");
+        committer.add(TEST_ID, new NullInputStream(0), metadata);
+        committer.commit();
+        
+        // Check that it's in ES
+        JSONObject doc = getDocument(TEST_ID); 
+        assertTrue("Not found.", isFound(doc));
+        
+        // Check the dots were replaced
+        assertEquals("Dots not replaced.", fieldValue, doc.getJSONObject(
+                "_source").getString(fieldNameNoDots));
+        assertFalse("Dots still present.", doc.getJSONObject(
+                "_source").has(fieldNameDots));
+    }
+    
+    private boolean hasTestContent(JSONObject json) throws IOException {
+        return TEST_CONTENT.equals(getContent(json));
+    }
+    private String getContent(JSONObject json) throws IOException {
+        return json.getJSONObject("_source").getString(CONTENT_FIELD);
+    }
+    private boolean isFound(JSONObject json) throws IOException {
+        return json.getBoolean("found");
+    }
+    private JSONObject getDocument(String id) throws IOException {
+        return performTypeRequest("GET", id);
+    }
+    private JSONObject performTypeRequest(String method, String request)
+            throws IOException {
+        return performRequest(method, TYPE_ENDPOINT
+                + URLEncoder.encode(request, CharEncoding.UTF_8));
+    }
+    private JSONObject performRequest(String method, String endpoint)
+            throws IOException {
+        Response httpResponse;
+        try {
+            httpResponse = restClient.performRequest(method, endpoint);
+        } catch (ResponseException e) {
+            httpResponse = e.getResponse();
+        }
+        String response = IOUtils.toString(
+                httpResponse.getEntity().getContent(), CharEncoding.UTF_8);
+        LOG.debug("RESPONSE: " + response);
+        return new JSONObject(response);
+    }
+    private InputStream getContentStream() throws IOException {
+        return IOUtils.toInputStream(TEST_CONTENT, CharEncoding.UTF_8);
     }
 }
