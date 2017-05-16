@@ -49,6 +49,8 @@ import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.sniff.ElasticsearchHostsSniffer;
 import org.elasticsearch.client.sniff.HostsSniffer;
 import org.elasticsearch.client.sniff.Sniffer;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.norconex.committer.core.AbstractCommitter;
 import com.norconex.committer.core.AbstractMappedCommitter;
@@ -431,7 +433,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 }
             }
             if (LOG.isTraceEnabled()) {
-                LOG.trace("POST JSON:\n" + StringUtils.trim(json.toString()));
+                LOG.trace("JSON POST:\n" + StringUtils.trim(json.toString()));
             }
             StringEntity requestEntity = new StringEntity(
                     json.toString(), ContentType.APPLICATION_JSON);
@@ -439,10 +441,13 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                     "POST", "/_bulk", Collections.emptyMap(), requestEntity);
             handleResponse(response);
             LOG.info("Done sending commit operations to Elasticsearch.");
+        } catch (CommitterException e) {
+            close();
+            throw e;
         } catch (Exception e) {
             close();
             throw new CommitterException(
-                    "Could not commit JSON batch to Elasticsearch." + e);
+                    "Could not commit JSON batch to Elasticsearch.", e);
         }
     }
 
@@ -452,12 +457,16 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         if (respEntity != null) {
             String responseAsString = IOUtils.toString(
                     respEntity.getContent(), StandardCharsets.UTF_8);
-            // We have no need for the JSON, so we save on the parsing.
-            // We just check for errors and if so, log the whole response.
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Elasticsearch response:\n" + responseAsString);
+            }
+            
+            // We have no need to parse the JSON if successful 
+            // (saving on the parsing). We'll do it on errors only
+            // to filter out successful ones and report only the errors
             if (StringUtils.substring(
                     responseAsString, 0, 100).contains("\"errors\":true")) {
-                String error = "Elasticsearch returned one or more errors. "
-                        + "Response:" + responseAsString;
+                String error = extractResponseErrors(responseAsString);
                 if (ignoreResponseErrors) {
                     LOG.warn(error);
                 } else {
@@ -475,6 +484,24 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
             throw new CommitterException(
                   "Invalid HTTP response: " + response.getStatusLine());
         }
+    }
+    
+    private String extractResponseErrors(String response) {
+        StringBuilder error = new StringBuilder();
+        JSONObject json = new JSONObject(response);
+        JSONArray items = json.getJSONArray("items");
+        for (Object it : items) {
+            JSONObject index = ((JSONObject) it).getJSONObject("index");
+            if (index.has("error")) {
+                if (error.length() > 0) {
+                    error.append(",\n");
+                }
+                error.append(index.toString(4));
+            }
+        }
+        error.append(']');
+        error.insert(0, "Elasticsearch returned one or more errors:\n[");
+        return error.toString();
     }
     
     private void appendAddOperation(StringBuilder json, IAddOperation add)

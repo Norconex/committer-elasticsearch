@@ -17,6 +17,7 @@ package com.norconex.committer.elasticsearch;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +29,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.lang3.CharEncoding;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -45,6 +47,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.norconex.committer.core.CommitterException;
 import com.norconex.commons.lang.map.Properties;
 
 import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
@@ -294,7 +297,6 @@ public class ElasticsearchCommitterTest {
     
     @Test
 	public void testMultiValueFields() throws Exception {
-		
     	Properties metadata = new Properties();
         String fieldname = "multi";
 		metadata.setString(fieldname, "1", "2", "3");
@@ -333,6 +335,48 @@ public class ElasticsearchCommitterTest {
         assertFalse("Dots still present.", doc.getJSONObject(
                 "_source").has(fieldNameDots));
     }
+
+    @Test
+    public void testErrorsFiltering() throws Exception {
+        // Should only get errors returned.
+        Properties metadata;
+
+        // Commit first one to set the date format
+        metadata = new Properties();
+        metadata.setString("date", "2014-01-01");
+        committer.add("good1", new NullInputStream(0), metadata);
+        committer.commit();
+
+        // Commit a mixed batch with one wrong date format
+        metadata = new Properties();
+        metadata.setString("date", "2014-01-02");
+        committer.add("good2", new NullInputStream(0), metadata);
+
+        metadata = new Properties();
+        metadata.setString("date", "5/30/2011");
+        committer.add("bad1", new NullInputStream(0), metadata);
+
+        metadata = new Properties();
+        metadata.setString("date", "2014-01-03");
+        committer.add("good3", new NullInputStream(0), metadata);
+        
+        metadata = new Properties();
+        metadata.setString("date", "5/30/2012");
+        committer.add("bad2", new NullInputStream(0), metadata);
+
+        metadata = new Properties();
+        metadata.setString("date", "2014-01-04");
+        committer.add("good4", new NullInputStream(0), metadata);
+
+        try {
+            committer.commit();
+            fail("Failed to throw exception.");
+        } catch (CommitterException e) {
+            assertEquals("Wrong error count.", 2, StringUtils.countMatches(
+                    e.getMessage(), "\"error\":"));
+        }
+    }
+
     
     private boolean hasTestContent(JSONObject json) throws IOException {
         return TEST_CONTENT.equals(getContent(json));
