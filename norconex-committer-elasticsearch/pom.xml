@@ -27,7 +27,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>    
     <site.baseurl />
-    <norconex-commons-lang.version>1.13.0</norconex-commons-lang.version>
+    <norconex-commons-lang.version>1.13.1</norconex-commons-lang.version>
     <elasticsearch.version>5.4.0</elasticsearch.version>
   </properties>
   <inceptionYear>2013</inceptionYear>
