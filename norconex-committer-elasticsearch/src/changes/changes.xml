@@ -33,6 +33,9 @@
         The "clusterName" and "clusterHosts" configuration options were
         replaced with "nodes".
       </action>
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Norconex Committer Core 2.1.1.
+      </action>
       <action dev="essiembre" type="remove">
         Removed support for Elasticsearch Transport Client.  Elasticsearch
         will eventually drop support for it in favor of the REST API.
