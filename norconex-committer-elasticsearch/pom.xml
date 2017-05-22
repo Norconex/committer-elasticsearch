@@ -492,7 +492,8 @@
         <organization>Norconex Inc.</organization>
         <organizationUrl>https://www.norconex.com</organizationUrl>
         <roles>
-          <role>release manager</role>
+          <role>project leader</role>
+          <role>developer</role>
         </roles>
         <timezone>-4</timezone>
     </developer>

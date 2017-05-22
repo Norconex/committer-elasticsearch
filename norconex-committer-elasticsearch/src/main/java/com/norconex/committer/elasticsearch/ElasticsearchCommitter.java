@@ -282,7 +282,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     /**
      * Whether to ignore response errors.  By default, an exception is 
      * thrown if the Elasticsearch response contains an error.  
-     * When <code>true</code> the errors are logged as warnings instead.
+     * When <code>true</code> the errors are logged instead.
      * @return <code>true</code> when ignoring response errors
      */
     public boolean isIgnoreResponseErrors() {
@@ -292,7 +292,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
      * Sets whether to ignore response errors.  
      * When <code>false</code>, an exception is 
      * thrown if the Elasticsearch response contains an error.  
-     * When <code>true</code> the errors are logged as warnings instead.
+     * When <code>true</code> the errors are logged instead.
      * @param ignoreResponseErrors <code>true</code> when ignoring response 
      *        errors
      */
@@ -468,7 +468,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                     responseAsString, 0, 100).contains("\"errors\":true")) {
                 String error = extractResponseErrors(responseAsString);
                 if (ignoreResponseErrors) {
-                    LOG.warn(error);
+                    LOG.error(error);
                 } else {
                     close();
                     throw new CommitterException(error);
