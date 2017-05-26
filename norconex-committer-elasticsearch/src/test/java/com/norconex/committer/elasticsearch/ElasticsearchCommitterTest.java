@@ -73,10 +73,10 @@ public class ElasticsearchCommitterTest {
             ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD;
     
     private static EmbeddedElastic elastic;
-    private static ElasticsearchCommitter committer;
     private static RestClient restClient;
     private static String node;
-    
+
+    private ElasticsearchCommitter committer;
     private File queue;
     
     @BeforeClass
@@ -108,11 +108,11 @@ public class ElasticsearchCommitterTest {
         //performIndexRequest("POST", "_flush");
         performRequest("DELETE", "/" + TEST_INDEX);
         performRequest("POST", "_flush");
+        committer.close();
     }
 
     @AfterClass
     public static void afterClass() {
-        committer.close();
         IOUtils.closeQuietly(restClient);
         if (elastic != null) {
             elastic.stop();
