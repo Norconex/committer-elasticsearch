@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.norconex.collectors</groupId>
   <artifactId>norconex-committer-elasticsearch</artifactId>
-  <version>4.0.0</version>
+  <version>4.1.0-SNAPSHOT</version>
   <name>Norconex Committer Elasticsearch</name>
   <description>Elasticsearch implementation of Norconex Committer.</description>
 
@@ -27,8 +27,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>    
     <site.baseurl />
-    <norconex-commons-lang.version>1.13.1</norconex-commons-lang.version>
-    <elasticsearch.version>5.4.0</elasticsearch.version>
+    <norconex-commons-lang.version>1.14.0-SNAPSHOT</norconex-commons-lang.version>
+    <elasticsearch.version>5.5.3</elasticsearch.version>
   </properties>
   <inceptionYear>2013</inceptionYear>
 
@@ -54,10 +54,31 @@
   </repositories>
 
   <dependencies>
+  
+    <!-- === Fix transitive dependencies versions: === -->  
+    <dependency>
+      <groupId>com.norconex.commons</groupId>
+      <artifactId>norconex-commons-lang</artifactId>
+      <version>${norconex-commons-lang.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.6</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2.2</version>
+    </dependency>
+  
+  
+    <!--  === Other dependencies: === -->
+      
     <dependency>
       <groupId>com.norconex.collectors</groupId>
       <artifactId>norconex-committer-core</artifactId>
-      <version>2.1.0</version>
+      <version>2.1.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
@@ -100,26 +121,6 @@
         <scope>provided</scope>
     </dependency>
   </dependencies>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.norconex.commons</groupId>
-        <artifactId>norconex-commons-lang</artifactId>
-        <version>${norconex-commons-lang.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-        <version>2.6</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-collections</groupId>
-        <artifactId>commons-collections</artifactId>
-        <version>3.2.2</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <build>
     <resources>

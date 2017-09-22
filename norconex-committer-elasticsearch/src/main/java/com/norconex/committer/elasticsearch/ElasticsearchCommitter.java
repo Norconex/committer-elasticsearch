@@ -26,11 +26,11 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
@@ -97,7 +97,22 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  * You can also make sure only the fields you are interested in are making
  * their way to Elasticsearch by using  
  * <a href="https://www.norconex.com/collectors/importer/latest/apidocs/com/norconex/importer/handler/tagger/impl/KeepOnlyTagger.html">
- * KeepOnlyTagger</a>.
+ * KeepOnlyTagger</a>.  If your dot represents a nested object, keep reading.
+ * </p>
+ * 
+ * <h3>JSON Objects</h3>
+ * <p>
+ * <b>Since 4.1.0</b>, it is possible to provide a regular expression 
+ * that will identify one or more fields containing a JSON object rather
+ * than a regular string ({@link #setJsonFieldsPattern(String)}). For example,
+ * this is a useful way to store nested objects.  While very flexible,
+ * it can be challenging to come up with the JSON structure.  You may 
+ * want to consider custom code to do so, or if you are using Norconex
+ * Importer, one approach could be to use the 
+ * <a href="https://www.norconex.com/collectors/importer/latest/apidocs/com/norconex/importer/handler/tagger/impl/ScriptTagger.html">
+ * ScriptTagger</a>.
+ * For this to work properly, make sure you define your Elasticsearch
+ * field mappings on your index/type beforehand.
  * </p>
  * 
  * <h3>Authentication</h3>
@@ -150,6 +165,10 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *      &lt;dotReplacement&gt;
  *         (Optional value replacing dots in field names)
  *      &lt;/dotReplacement&gt;
+ *      &lt;jsonFieldsPattern&gt;
+ *         (Optional regular expression to identify fields containing JSON
+ *          objects instead of regular strings)
+ *      &lt;/jsonFieldsPattern&gt;
  *  
  *      &lt;!-- Use the following if authentication is required. --&gt;
  *      &lt;username&gt;(Optional user name)&lt;/username&gt;
@@ -224,6 +243,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     private String password;
     private EncryptionKey passwordKey;
     private String dotReplacement;
+    private String jsonFieldsPattern;
 
     /**
      * Constructor.
@@ -277,6 +297,26 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
      */
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+
+    /**
+     * Gets the regular expression matching fields that contains a JSON
+     * object for its value (as opposed to a regular string). 
+     * Default is <code>null</code>.
+     * @return regular expression
+     * @since 4.1.0
+     */
+    public String getJsonFieldsPattern() {
+        return jsonFieldsPattern;
+    }
+    /**
+     * Sets the regular expression matching fields that contains a JSON
+     * object for its value (as opposed to a regular string).
+     * @param jsonFieldsPattern regular expression
+     * @since 4.1.0
+     */
+    public void setJsonFieldsPattern(String jsonFieldsPattern) {
+        this.jsonFieldsPattern = jsonFieldsPattern;
     }
 
     /**
@@ -490,8 +530,9 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         StringBuilder error = new StringBuilder();
         JSONObject json = new JSONObject(response);
         JSONArray items = json.getJSONArray("items");
-        for (Object it : items) {
-            JSONObject index = ((JSONObject) it).getJSONObject("index");
+        
+        for (int i = 0; i < items.length(); i++) {
+            JSONObject index = items.getJSONObject(i).getJSONObject("index");
             if (index.has("error")) {
                 if (error.length() > 0) {
                     error.append(",\n");
@@ -504,8 +545,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         return error.toString();
     }
     
-    private void appendAddOperation(StringBuilder json, IAddOperation add)
-            throws IOException {
+    private void appendAddOperation(StringBuilder json, IAddOperation add) {
         String id = add.getMetadata().getString(getSourceReferenceField());
         if (StringUtils.isBlank(id)) {
             id = add.getReference();
@@ -533,8 +573,8 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         json.append("}\n");
     }
     
-    private void appendDeleteOperation(StringBuilder json, IDeleteOperation del)
-            throws IOException {
+    private void appendDeleteOperation(
+            StringBuilder json, IDeleteOperation del) {
         json.append("{\"delete\":{");
         append(json, "_index", getIndexName());
         append(json.append(','), "_type", getTypeName());
@@ -555,9 +595,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
             if (!first) {
                 json.append(',');
             }
-            json.append('"')
-            .append(StringEscapeUtils.escapeJson(value))
-            .append("\"");
+            appendValue(json, field, value);
             first = false;
         }
         json.append(']');
@@ -566,9 +604,19 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     private void append(StringBuilder json, String field, String value) {
         json.append('"')
             .append(StringEscapeUtils.escapeJson(field))
-            .append("\":\"")
-            .append(StringEscapeUtils.escapeJson(value))
-            .append("\"");
+            .append("\":");
+        appendValue(json, field, value);
+    }
+    
+    private void appendValue(StringBuilder json, String field, String value) {
+        if (getJsonFieldsPattern() != null 
+                && getJsonFieldsPattern().matches(field)) {
+            json.append(value);
+        } else {
+            json.append('"')
+                .append(StringEscapeUtils.escapeJson(value))
+                .append("\"");
+        }
     }
     
     private synchronized RestClient nullSafeRestClient() {
@@ -637,6 +685,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         w.writeElementString("username", getUsername());
         w.writeElementString("password", getPassword());
         w.writeElementString("dotReplacement", getDotReplacement());
+        w.writeElementString("jsonFieldsPattern", getJsonFieldsPattern());
 
         // Encrypted password:
         EncryptionKey key = getPasswordKey();
@@ -681,6 +730,8 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         setUsername(xml.getString("username", getUsername()));
         setPassword(xml.getString("password", getPassword()));
         setDotReplacement(xml.getString("dotReplacement", getDotReplacement()));
+        setJsonFieldsPattern(
+                xml.getString("jsonFieldsPattern", getJsonFieldsPattern()));
         
         // encrypted password:
         String xmlKey = xml.getString("passwordKey", null);
@@ -707,6 +758,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append(password)
                 .append(passwordKey)
                 .append(dotReplacement)
+                .append(jsonFieldsPattern)
                 .toHashCode();
     }
 
@@ -733,6 +785,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append(password, other.password)
                 .append(passwordKey, other.passwordKey)
                 .append(dotReplacement, other.dotReplacement)
+                .append(jsonFieldsPattern, other.jsonFieldsPattern)
                 .isEquals();
     }
 
@@ -749,6 +802,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append("password", password)
                 .append("passwordKey", passwordKey)
                 .append("dotReplacement", dotReplacement)
+                .append("jsonFieldsPattern", jsonFieldsPattern)
                 .toString();
     }
 }

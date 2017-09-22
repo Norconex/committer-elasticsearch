@@ -23,12 +23,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.NullInputStream;
-import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.entity.ContentType;
@@ -310,7 +310,7 @@ public class ElasticsearchCommitterTest {
         
         // Check multi values are still there
         assertEquals("Multi-value not saved properly.", 3, doc.getJSONObject(
-                "_source").getJSONArray(fieldname).toList().size());
+                "_source").getJSONArray(fieldname).length());
 	}
 
     @Test
@@ -392,8 +392,8 @@ public class ElasticsearchCommitterTest {
     }
     private JSONObject performTypeRequest(String method, String request)
             throws IOException {
-        return performRequest(method, TYPE_ENDPOINT
-                + URLEncoder.encode(request, CharEncoding.UTF_8));
+        return performRequest(method, TYPE_ENDPOINT + URLEncoder.encode(
+                request, StandardCharsets.UTF_8.toString()));
     }
     private JSONObject performRequest(String method, String endpoint)
             throws IOException {
@@ -404,11 +404,11 @@ public class ElasticsearchCommitterTest {
             httpResponse = e.getResponse();
         }
         String response = IOUtils.toString(
-                httpResponse.getEntity().getContent(), CharEncoding.UTF_8);
+                httpResponse.getEntity().getContent(), StandardCharsets.UTF_8);
         LOG.debug("RESPONSE: " + response);
         return new JSONObject(response);
     }
     private InputStream getContentStream() throws IOException {
-        return IOUtils.toInputStream(TEST_CONTENT, CharEncoding.UTF_8);
+        return IOUtils.toInputStream(TEST_CONTENT, StandardCharsets.UTF_8);
     }
 }
