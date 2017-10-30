@@ -28,7 +28,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>    
     <site.baseurl />
     <norconex-commons-lang.version>1.14.0-SNAPSHOT</norconex-commons-lang.version>
-    <elasticsearch.version>5.5.3</elasticsearch.version>
+    <elasticsearch.version>5.6.3</elasticsearch.version>
   </properties>
   <inceptionYear>2013</inceptionYear>
 
@@ -82,12 +82,12 @@
     </dependency>
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
-      <artifactId>rest</artifactId>
+      <artifactId>elasticsearch-rest-client</artifactId>
       <version>${elasticsearch.version}</version>
     </dependency>
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
-      <artifactId>sniffer</artifactId>
+      <artifactId>elasticsearch-rest-client-sniffer</artifactId>
       <version>${elasticsearch.version}</version>
     </dependency>
     <dependency>
@@ -99,11 +99,15 @@
     <!-- This better for unit testing until ES comes up with embedded
          that gets a rest client. org.elasticsearch.test:framework 
          does not offer embedded ES.
+         
+         Do not go higher than 2.4.0 until this is fixed:
+         https://github.com/allegro/embedded-elasticsearch/issues/31
+         (or it will hang on Windows).
      -->
     <dependency>
       <groupId>pl.allegro.tech</groupId>
       <artifactId>embedded-elasticsearch</artifactId>
-      <version>2.1.0</version>
+      <version>2.4.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>

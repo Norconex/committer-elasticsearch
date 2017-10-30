@@ -27,6 +27,9 @@
   <password>password</password>
   <passwordKey>encryptionkey</passwordKey>
   <passwordKeySource>property</passwordKeySource>
+  <jsonFieldsPattern>pattern</jsonFieldsPattern>
+  <connectionTimeout>5 seconds</connectionTimeout>
+  <socketTimeout>70 seconds</socketTimeout>
   
   <sourceReferenceField keep="true">sourceReferenceField</sourceReferenceField>
   <!-- This element is not supported by ElasticsearchCommitter:

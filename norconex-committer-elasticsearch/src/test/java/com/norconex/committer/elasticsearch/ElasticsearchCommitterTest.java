@@ -61,7 +61,7 @@ public class ElasticsearchCommitterTest {
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
 
-    private static final String TEST_ES_VERSION = "5.4.0";
+    private static final String TEST_ES_VERSION = "5.6.3";
     private static final String TEST_INDEX = "tests";
     private static final String TEST_TYPE = "test";
     private static final String TEST_ID = "1";

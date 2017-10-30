@@ -151,6 +151,12 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *   </tr>
  * </table>
  * 
+ * <h3>Timeouts</h3>
+ * <p>
+ * <b>Since 4.1.0</b>, it is possible to specify timeout values (in 
+ * milliseconds), applied when data is sent to Elasticsearch.
+ * </p>
+ * 
  * <h3>XML configuration usage:</h3>
  * <pre>
  *  &lt;committer class="com.norconex.committer.elasticsearch.ElasticsearchCommitter"&gt;
@@ -169,6 +175,8 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *         (Optional regular expression to identify fields containing JSON
  *          objects instead of regular strings)
  *      &lt;/jsonFieldsPattern&gt;
+ *      &lt;connectionTimeout&gt;(milliseconds)&lt;/connectionTimeout&gt;
+ *      &lt;socketTimeout&gt;(milliseconds)&lt;/socketTimeout&gt;
  *  
  *      &lt;!-- Use the following if authentication is required. --&gt;
  *      &lt;username&gt;(Optional user name)&lt;/username&gt;
@@ -229,8 +237,11 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
             LogManager.getLogger(ElasticsearchCommitter.class);
 
     public static final String DEFAULT_NODE = "http://localhost:9200"; 
-    
     public static final String DEFAULT_ES_CONTENT_FIELD = "content";
+    /** @since 4.1.0 */
+    public static final int DEFAULT_CONNECTION_TIMEOUT = 1000;
+    /** @since 4.1.0 */
+    public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
 
     private RestClient client;
     private Sniffer sniffer;
@@ -244,6 +255,8 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     private EncryptionKey passwordKey;
     private String dotReplacement;
     private String jsonFieldsPattern;
+    private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
+    private int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
 
     /**
      * Constructor.
@@ -422,6 +435,38 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         this.dotReplacement = dotReplacement;
     }
     
+    /**
+     * Gets Elasticsearch connection timeout.
+     * @return milliseconds
+     * @since 4.1.0
+     */
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+    /**
+     * Sets Elasticsearch connection timeout.
+     * @param connectionTimeout milliseconds
+     * @since 4.1.0
+     */
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+    /**
+     * Gets Elasticsearch socket timeout.
+     * @return milliseconds
+     * @since 4.1.0
+     */
+    public int getSocketTimeout() {
+        return socketTimeout;
+    }
+    /**
+     * Sets Elasticsearch socket timeout.
+     * @param socketTimeout milliseconds
+     * @since 4.1.0
+     */
+    public void setSocketTimeout(int socketTimeout) {
+        this.socketTimeout = socketTimeout;
+    }
     @Override
     public void commit() {
         super.commit();
@@ -642,14 +687,18 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
             httpHosts[i] = HttpHost.create(elasticHosts[i]);
         }
         
-        RestClientBuilder builder = RestClient.builder(httpHosts)
-                .setFailureListener(new FailureListener() {
+        RestClientBuilder builder = RestClient.builder(httpHosts);
+        builder.setFailureListener(new FailureListener() {
             @Override
             public void onFailure(HttpHost host) {
                 LOG.error("Failure occured on node: \"" + host
                         + "\". Check node logs.");
             }
         });
+        builder.setRequestConfigCallback(rcb -> rcb
+                .setConnectTimeout(connectionTimeout)
+                .setSocketTimeout(socketTimeout));
+        
         if (StringUtils.isNotBlank(getUsername())) {
             CredentialsProvider credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(
@@ -686,7 +735,9 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         w.writeElementString("password", getPassword());
         w.writeElementString("dotReplacement", getDotReplacement());
         w.writeElementString("jsonFieldsPattern", getJsonFieldsPattern());
-
+        w.writeElementInteger("connectionTimeout", getConnectionTimeout());
+        w.writeElementInteger("socketTimeout", getSocketTimeout());
+        
         // Encrypted password:
         EncryptionKey key = getPasswordKey();
         if (key != null) {
@@ -732,6 +783,10 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         setDotReplacement(xml.getString("dotReplacement", getDotReplacement()));
         setJsonFieldsPattern(
                 xml.getString("jsonFieldsPattern", getJsonFieldsPattern()));
+        setConnectionTimeout((int) XMLConfigurationUtil.getDuration(
+                xml, "connectionTimeout", getConnectionTimeout()));
+        setSocketTimeout((int) XMLConfigurationUtil.getDuration(
+                xml, "socketTimeout", getSocketTimeout()));
         
         // encrypted password:
         String xmlKey = xml.getString("passwordKey", null);
@@ -759,6 +814,8 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append(passwordKey)
                 .append(dotReplacement)
                 .append(jsonFieldsPattern)
+                .append(connectionTimeout)
+                .append(socketTimeout)
                 .toHashCode();
     }
 
@@ -786,6 +843,8 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append(passwordKey, other.passwordKey)
                 .append(dotReplacement, other.dotReplacement)
                 .append(jsonFieldsPattern, other.jsonFieldsPattern)
+                .append(connectionTimeout, other.connectionTimeout)
+                .append(socketTimeout, other.socketTimeout)
                 .isEquals();
     }
 
@@ -803,6 +862,8 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append("passwordKey", passwordKey)
                 .append("dotReplacement", dotReplacement)
                 .append("jsonFieldsPattern", jsonFieldsPattern)
+                .append("connectionTimeout", connectionTimeout)
+                .append("socketTimeout", socketTimeout)
                 .toString();
     }
 }

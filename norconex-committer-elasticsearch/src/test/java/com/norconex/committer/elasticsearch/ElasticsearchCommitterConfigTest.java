@@ -55,6 +55,9 @@ public class ElasticsearchCommitterConfigTest {
         committer.setPassword("password");
         committer.setPasswordKey(
                 new EncryptionKey("encValue", Source.ENVIRONMENT));
+        committer.setJsonFieldsPattern("jsonFieldPattern");
+        committer.setConnectionTimeout(200);
+        committer.setSocketTimeout(300);
         
         System.out.println("Writing/Reading this: " + committer);
         XMLConfigurationUtil.assertWriteRead(committer);

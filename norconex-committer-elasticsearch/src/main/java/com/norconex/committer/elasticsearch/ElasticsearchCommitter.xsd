@@ -42,6 +42,9 @@
                 </xs:restriction>
               </xs:simpleType>
             </xs:element>
+            <xs:element name="jsonFieldsPattern" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="connectionTimeout" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="socketTimeout" type="xs:string" minOccurs="0" maxOccurs="1" />
           </xs:all>
         </xs:extension> 
       </xs:complexContent>

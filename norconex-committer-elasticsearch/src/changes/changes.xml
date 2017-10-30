@@ -8,11 +8,14 @@
   <body>
 
     <release version="4.1.0-SNAPSHOT" date="2017-??-??" description="Feature release">
+      <action dev="essiembre" type="add" issue="22">
+        Added new "connectionTimeout" and "socketTimeout" options.
+      </action>
       <action dev="essiembre" type="add" issue="16">
         Can now consider specific field values as JSON objects.
       </action>
       <action dev="essiembre" type="update">
-        Maven dependency updates: Elasticsearch REST client 5.5.3,
+        Maven dependency updates: Elasticsearch REST client 5.6.3,
         Norconex Commons Lang 1.14.0.
       </action>      
     </release>
