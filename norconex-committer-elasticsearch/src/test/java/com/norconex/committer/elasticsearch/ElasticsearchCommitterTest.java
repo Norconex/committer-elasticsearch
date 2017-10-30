@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -84,6 +85,7 @@ public class ElasticsearchCommitterTest {
         elastic = EmbeddedElastic.builder()
                 .withElasticVersion(TEST_ES_VERSION)
                 .withSetting(PopularProperties.CLUSTER_NAME, "test_cluster")
+                .withStartTimeout(5, TimeUnit.MINUTES)
                 .build()
                 .start();
 
