@@ -30,6 +30,7 @@
   <jsonFieldsPattern>pattern</jsonFieldsPattern>
   <connectionTimeout>5 seconds</connectionTimeout>
   <socketTimeout>70 seconds</socketTimeout>
+  <maxRetryTimeout>2 minutes</maxRetryTimeout>
   
   <sourceReferenceField keep="true">sourceReferenceField</sourceReferenceField>
   <!-- This element is not supported by ElasticsearchCommitter:

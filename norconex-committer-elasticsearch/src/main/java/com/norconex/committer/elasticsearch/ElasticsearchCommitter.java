@@ -177,6 +177,7 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *      &lt;/jsonFieldsPattern&gt;
  *      &lt;connectionTimeout&gt;(milliseconds)&lt;/connectionTimeout&gt;
  *      &lt;socketTimeout&gt;(milliseconds)&lt;/socketTimeout&gt;
+ *      &lt;maxRetryTimeout&gt;(milliseconds)&lt;/maxRetryTimeout&gt;
  *  
  *      &lt;!-- Use the following if authentication is required. --&gt;
  *      &lt;username&gt;(Optional user name)&lt;/username&gt;
@@ -242,6 +243,8 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     public static final int DEFAULT_CONNECTION_TIMEOUT = 1000;
     /** @since 4.1.0 */
     public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
+    /** @since 4.1.0 */
+    public static final int DEFAULT_MAX_RETRY_TIMEOUT = 30000;
 
     private RestClient client;
     private Sniffer sniffer;
@@ -257,6 +260,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     private String jsonFieldsPattern;
     private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
     private int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
+    private int maxRetryTimeout = DEFAULT_MAX_RETRY_TIMEOUT;
 
     /**
      * Constructor.
@@ -467,6 +471,25 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     public void setSocketTimeout(int socketTimeout) {
         this.socketTimeout = socketTimeout;
     }
+    /**
+     * Gets Elasticsearch maximum amount of time to wait before retrying
+     * a failing host.
+     * return milliseconds
+     * @since 4.1.0
+     */
+    public int getMaxRetryTimeout() {
+        return maxRetryTimeout;
+    }
+    /**
+     * Sets Elasticsearch maximum amount of time to wait before retrying
+     * a failing host.
+     * @param maxRetryTimeout milliseconds
+     * @since 4.1.0
+     */
+    public void setMaxRetryTimeout(int maxRetryTimeout) {
+        this.maxRetryTimeout = maxRetryTimeout;
+    }
+    
     @Override
     public void commit() {
         super.commit();
@@ -698,6 +721,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         builder.setRequestConfigCallback(rcb -> rcb
                 .setConnectTimeout(connectionTimeout)
                 .setSocketTimeout(socketTimeout));
+        builder.setMaxRetryTimeoutMillis(maxRetryTimeout);
         
         if (StringUtils.isNotBlank(getUsername())) {
             CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -737,6 +761,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         w.writeElementString("jsonFieldsPattern", getJsonFieldsPattern());
         w.writeElementInteger("connectionTimeout", getConnectionTimeout());
         w.writeElementInteger("socketTimeout", getSocketTimeout());
+        w.writeElementInteger("maxRetryTimeout", getMaxRetryTimeout());
         
         // Encrypted password:
         EncryptionKey key = getPasswordKey();
@@ -787,6 +812,8 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 xml, "connectionTimeout", getConnectionTimeout()));
         setSocketTimeout((int) XMLConfigurationUtil.getDuration(
                 xml, "socketTimeout", getSocketTimeout()));
+        setMaxRetryTimeout((int) XMLConfigurationUtil.getDuration(
+                xml, "maxRetryTimeout", getMaxRetryTimeout()));
         
         // encrypted password:
         String xmlKey = xml.getString("passwordKey", null);
@@ -816,6 +843,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append(jsonFieldsPattern)
                 .append(connectionTimeout)
                 .append(socketTimeout)
+                .append(maxRetryTimeout)
                 .toHashCode();
     }
 
@@ -845,6 +873,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append(jsonFieldsPattern, other.jsonFieldsPattern)
                 .append(connectionTimeout, other.connectionTimeout)
                 .append(socketTimeout, other.socketTimeout)
+                .append(maxRetryTimeout, other.maxRetryTimeout)
                 .isEquals();
     }
 
@@ -864,6 +893,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append("jsonFieldsPattern", jsonFieldsPattern)
                 .append("connectionTimeout", connectionTimeout)
                 .append("socketTimeout", socketTimeout)
+                .append("maxRetryTimeout", maxRetryTimeout)
                 .toString();
     }
 }
