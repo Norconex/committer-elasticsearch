@@ -31,7 +31,7 @@
   <connectionTimeout>5 seconds</connectionTimeout>
   <socketTimeout>70 seconds</socketTimeout>
   <maxRetryTimeout>2 minutes</maxRetryTimeout>
-  <fixBadIds>trueASDF</fixBadIds>
+  <fixBadIds>true</fixBadIds>
   
   <sourceReferenceField keep="true">sourceReferenceField</sourceReferenceField>
   <!-- This element is not supported by ElasticsearchCommitter:
