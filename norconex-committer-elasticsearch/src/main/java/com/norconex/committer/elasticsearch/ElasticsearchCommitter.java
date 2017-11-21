@@ -15,6 +15,7 @@
 package com.norconex.committer.elasticsearch;
 
 import java.io.IOException;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -58,6 +59,7 @@ import com.norconex.committer.core.CommitterException;
 import com.norconex.committer.core.IAddOperation;
 import com.norconex.committer.core.ICommitOperation;
 import com.norconex.committer.core.IDeleteOperation;
+import com.norconex.commons.lang.StringUtil;
 import com.norconex.commons.lang.config.XMLConfigurationUtil;
 import com.norconex.commons.lang.encrypt.EncryptionKey;
 import com.norconex.commons.lang.encrypt.EncryptionUtil;
@@ -98,6 +100,19 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  * their way to Elasticsearch by using  
  * <a href="https://www.norconex.com/collectors/importer/latest/apidocs/com/norconex/importer/handler/tagger/impl/KeepOnlyTagger.html">
  * KeepOnlyTagger</a>.  If your dot represents a nested object, keep reading.
+ * </p>
+ * 
+ * <h3>Elasticsearch ID limitations:</h3>
+ * <p>
+ * As of this writing, Elasticsearch 5 or higher have a 512 bytes 
+ * limitation on its "_id" field. 
+ * By default, an error (from Elasticsearch) will result from trying to submit
+ * documents with an invalid ID. <b>As of 4.1.0</b>, you can get around this by
+ * setting {@link #setFixBadIds(boolean)} to <code>true</code>.  It will
+ * truncate references that are too long and append a hash code to it
+ * representing the truncated part. This approach is not 100% 
+ * collision-free (uniqueness), but it should safely cover the vast 
+ * majority of cases. 
  * </p>
  * 
  * <h3>JSON Objects</h3>
@@ -178,6 +193,9 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *      &lt;connectionTimeout&gt;(milliseconds)&lt;/connectionTimeout&gt;
  *      &lt;socketTimeout&gt;(milliseconds)&lt;/socketTimeout&gt;
  *      &lt;maxRetryTimeout&gt;(milliseconds)&lt;/maxRetryTimeout&gt;
+ *      &lt;fixBadIds&gt;
+ *         [false|true](Forces references to fit into Elasticsearch _id field.)
+ *      &lt;/fixBadIds&gt;
  *  
  *      &lt;!-- Use the following if authentication is required. --&gt;
  *      &lt;username&gt;(Optional user name)&lt;/username&gt;
@@ -261,6 +279,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
     private int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
     private int maxRetryTimeout = DEFAULT_MAX_RETRY_TIMEOUT;
+    private boolean fixBadIds;
 
     /**
      * Constructor.
@@ -490,6 +509,29 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         this.maxRetryTimeout = maxRetryTimeout;
     }
     
+    /**
+     * Gets whether to fix IDs that are too long for Elasticsearch
+     * ID limitation (512 bytes max). If <code>true</code>, 
+     * long IDs will be truncated and a hash code representing the 
+     * truncated part will be appended.
+     * @return <code>true</code> to fix IDs that are too long
+     * @since 4.1.0
+     */
+    public boolean isFixBadIds() {
+        return fixBadIds;
+    }
+    /**
+     * Sets whether to fix IDs that are too long for Elasticsearch
+     * ID limitation (512 bytes max). If <code>true</code>, 
+     * long IDs will be truncated and a hash code representing the 
+     * truncated part will be appended.
+     * @param fixBadIds <code>true</code> to fix IDs that are too long
+     * @since 4.1.0
+     */
+    public void setFixBadIds(boolean fixBadIds) {
+        this.fixBadIds = fixBadIds;
+    }    
+    
     @Override
     public void commit() {
         super.commit();
@@ -621,7 +663,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         json.append("{\"index\":{");
         append(json, "_index", getIndexName());
         append(json.append(','), "_type", getTypeName());
-        append(json.append(','), "_id", id);
+        append(json.append(','), "_id", fixBadIdValue(id));
         json.append("}}\n{");
         boolean first = true;
         for (Entry<String, List<String>> entry : add.getMetadata().entrySet()) {
@@ -646,7 +688,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         json.append("{\"delete\":{");
         append(json, "_index", getIndexName());
         append(json.append(','), "_type", getTypeName());
-        append(json.append(','), "_id", del.getReference());
+        append(json.append(','), "_id", fixBadIdValue(del.getReference()));
         json.append("}}\n");
     }
 
@@ -686,6 +728,32 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append("\"");
         }
     }
+    
+    private String fixBadIdValue(String value) {
+        if (StringUtils.isBlank(value)) {
+            throw new CommitterException("Document id cannot be empty.");
+        }
+        if (fixBadIds && value.getBytes(StandardCharsets.UTF_8).length > 512) {
+            String v;
+            try {
+                v = StringUtil.truncateBytesWithHash(
+                        value, StandardCharsets.UTF_8, 512, "!");
+            } catch (CharacterCodingException e) {
+                LOG.error("Bad id detected (too long), but could not be "
+                        + "truncated properly by byte size. Will truncate "
+                        + "based on characters size instead, which may not "
+                        + "work on IDs containing multi-byte characters."); 
+                v = StringUtil.truncateWithHash(value, 512, "!");
+            }
+            if (LOG.isDebugEnabled() && !value.equals(v)) {
+                LOG.debug("Fixed document id from \"" + value + "\" to \""
+                        + v + "\".");
+            }
+            return v;
+        }
+        return value;
+    }
+    
     
     private synchronized RestClient nullSafeRestClient() {
         if (client == null) {
@@ -762,6 +830,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         w.writeElementInteger("connectionTimeout", getConnectionTimeout());
         w.writeElementInteger("socketTimeout", getSocketTimeout());
         w.writeElementInteger("maxRetryTimeout", getMaxRetryTimeout());
+        w.writeElementBoolean("fixBadIds", isFixBadIds());
         
         // Encrypted password:
         EncryptionKey key = getPasswordKey();
@@ -814,6 +883,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 xml, "socketTimeout", getSocketTimeout()));
         setMaxRetryTimeout((int) XMLConfigurationUtil.getDuration(
                 xml, "maxRetryTimeout", getMaxRetryTimeout()));
+        setFixBadIds(xml.getBoolean("fixBadIds", isFixBadIds()));
         
         // encrypted password:
         String xmlKey = xml.getString("passwordKey", null);
@@ -844,6 +914,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append(connectionTimeout)
                 .append(socketTimeout)
                 .append(maxRetryTimeout)
+                .append(fixBadIds)
                 .toHashCode();
     }
 
@@ -874,6 +945,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append(connectionTimeout, other.connectionTimeout)
                 .append(socketTimeout, other.socketTimeout)
                 .append(maxRetryTimeout, other.maxRetryTimeout)
+                .append(fixBadIds, other.fixBadIds)
                 .isEquals();
     }
 
@@ -894,6 +966,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append("connectionTimeout", connectionTimeout)
                 .append("socketTimeout", socketTimeout)
                 .append("maxRetryTimeout", maxRetryTimeout)
+                .append("fixBadIds", fixBadIds)
                 .toString();
     }
 }

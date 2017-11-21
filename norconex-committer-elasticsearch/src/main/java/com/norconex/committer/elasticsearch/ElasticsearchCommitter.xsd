@@ -46,6 +46,7 @@
             <xs:element name="connectionTimeout" type="xs:string" minOccurs="0" maxOccurs="1" />
             <xs:element name="socketTimeout" type="xs:string" minOccurs="0" maxOccurs="1" />
             <xs:element name="maxRetryTimeout" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="fixBadIds" type="xs:boolean" minOccurs="0" maxOccurs="1" />
           </xs:all>
         </xs:extension> 
       </xs:complexContent>

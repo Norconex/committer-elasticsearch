@@ -8,6 +8,10 @@
   <body>
 
     <release version="4.1.0-SNAPSHOT" date="2017-??-??" description="Feature release">
+      <action dev="essiembre" type="add">
+        New "fixBadIds" configuration options for modifying references
+        that are invalid for Elasticsearch ID limitations.
+      </action>
       <action dev="essiembre" type="add" issue="22">
         Added new "connectionTimeout" and "socketTimeout" options.
       </action>
