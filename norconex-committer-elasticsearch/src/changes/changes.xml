@@ -7,6 +7,17 @@
   </properties>
   <body>
 
+    <release version="4.1.1-SNAPSHOT" date="2019-??-??" description="Maintenance release">
+      <action dev="essiembre" type="update">
+        Configuration option "typeName" is now optional (as it is deprecated 
+        for bulk requests in Elasticsearch 7 or higher).
+      </action>      
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Elasticsearch REST client 7.1.0,
+        Norconex Commons Lang 1.15.0.
+      </action>      
+    </release>
+
     <release version="4.1.0" date="2017-11-26" description="Feature release">
       <action dev="essiembre" type="add">
         New "fixBadIds" configuration options for modifying references

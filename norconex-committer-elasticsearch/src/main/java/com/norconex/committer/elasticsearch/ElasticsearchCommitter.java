@@ -69,10 +69,10 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
 /**
  * <p>
  * Commits documents to Elasticsearch. Since version 4.0.0, this committer
- * relies on Elasticsearch REST API. If you wish to use the 
+ * relies on Elasticsearch REST API. If you wish to use the
  * Elasticsearch Transport Client, use an older version (the Transport Client
  * will eventually be deprecated by Elastic).
- * </p>  
+ * </p>
  * <p>
  * Despite being a subclass
  * of {@link AbstractMappedCommitter}, setting an <code>idTargetField</code>
@@ -80,60 +80,60 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  * </p>
  * <h3>Dots (.) in field names</h3>
  * <p>
- * Based on your Elasticsearch version, having dots in field names can have 
+ * Based on your Elasticsearch version, having dots in field names can have
  * different consequences.  Some versions will not accept them and generate
- * errors, while Elasticsearch 5 and up supports them, but they are treated 
+ * errors, while Elasticsearch 5 and up supports them, but they are treated
  * as objects, which may not always be what you want.
  * </p>
  * <p>
  * If your version of Elasticsearch does not handle dots the way you expect,
  * make sure you do not submit fields with dots. A good strategy
- * is to convert dots to another character (like underscore). 
+ * is to convert dots to another character (like underscore).
  * This can be accomplished by setting a <code>dotReplacement</code>.
  * </p>
  * <p>
- * In addition, if you are using a Norconex Collector with the 
+ * In addition, if you are using a Norconex Collector with the
  * Norconex Importer, you can rename the problematic fields with
  * <a href="https://www.norconex.com/collectors/importer/latest/apidocs/com/norconex/importer/handler/tagger/impl/RenameTagger.html">
- * RenameTagger</a>. 
+ * RenameTagger</a>.
  * You can also make sure only the fields you are interested in are making
- * their way to Elasticsearch by using  
+ * their way to Elasticsearch by using
  * <a href="https://www.norconex.com/collectors/importer/latest/apidocs/com/norconex/importer/handler/tagger/impl/KeepOnlyTagger.html">
  * KeepOnlyTagger</a>.  If your dot represents a nested object, keep reading.
  * </p>
- * 
+ *
  * <h3>Elasticsearch ID limitations:</h3>
  * <p>
- * As of this writing, Elasticsearch 5 or higher have a 512 bytes 
- * limitation on its "_id" field. 
+ * As of this writing, Elasticsearch 5 or higher have a 512 bytes
+ * limitation on its "_id" field.
  * By default, an error (from Elasticsearch) will result from trying to submit
  * documents with an invalid ID. <b>As of 4.1.0</b>, you can get around this by
  * setting {@link #setFixBadIds(boolean)} to <code>true</code>.  It will
  * truncate references that are too long and append a hash code to it
- * representing the truncated part. This approach is not 100% 
- * collision-free (uniqueness), but it should safely cover the vast 
- * majority of cases. 
+ * representing the truncated part. This approach is not 100%
+ * collision-free (uniqueness), but it should safely cover the vast
+ * majority of cases.
  * </p>
- * 
+ *
  * <h3>JSON Objects</h3>
  * <p>
- * <b>Since 4.1.0</b>, it is possible to provide a regular expression 
+ * <b>Since 4.1.0</b>, it is possible to provide a regular expression
  * that will identify one or more fields containing a JSON object rather
  * than a regular string ({@link #setJsonFieldsPattern(String)}). For example,
  * this is a useful way to store nested objects.  While very flexible,
- * it can be challenging to come up with the JSON structure.  You may 
+ * it can be challenging to come up with the JSON structure.  You may
  * want to consider custom code to do so, or if you are using Norconex
- * Importer, one approach could be to use the 
+ * Importer, one approach could be to use the
  * <a href="https://www.norconex.com/collectors/importer/latest/apidocs/com/norconex/importer/handler/tagger/impl/ScriptTagger.html">
  * ScriptTagger</a>.
  * For this to work properly, make sure you define your Elasticsearch
  * field mappings on your index/type beforehand.
  * </p>
- * 
+ *
  * <h3>Authentication</h3>
  * <p>
- * Basic authentication is supported for password-protected clusters. 
- * The <code>password</code> can optionally be 
+ * Basic authentication is supported for password-protected clusters.
+ * The <code>password</code> can optionally be
  * encrypted using {@link EncryptionUtil} (or command-line "encrypt.bat"
  * or "encrypt.sh").
  * In order for the password to be decrypted properly, you need
@@ -165,22 +165,32 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *     <td>Name of a JVM system property containing the key.</td>
  *   </tr>
  * </table>
- * 
+ *
  * <h3>Timeouts</h3>
  * <p>
- * <b>Since 4.1.0</b>, it is possible to specify timeout values (in 
+ * <b>Since 4.1.0</b>, it is possible to specify timeout values (in
  * milliseconds), applied when data is sent to Elasticsearch.
  * </p>
- * 
+ *
+ * <h3>Type Name</h3>
+ * <p>
+ * <b>Since 4.1.0</b>, the <code>typeName</code> configuration is now optional.
+ * As of Elasticsearch 7.0, specifying types in bulk requests is
+ * deprecated. Simply omit specifying a value for it if you are using
+ * Elasticsearch 7 or higher.
+ * </p>
+ *Specifying types in bulk requests is deprecated
+ *
+ *
  * <h3>XML configuration usage:</h3>
  * <pre>
  *  &lt;committer class="com.norconex.committer.elasticsearch.ElasticsearchCommitter"&gt;
  *      &lt;nodes&gt;
- *         (Comma-separated list of Elasticsearch node URLs. 
+ *         (Comma-separated list of Elasticsearch node URLs.
  *          Defaults to http://localhost:9200)
  *      &lt;/nodes&gt;
  *      &lt;indexName&gt;(Name of the index to use)&lt;/indexName&gt;
- *      &lt;typeName&gt;(Name of the type to use)&lt;/typeName&gt;
+ *      &lt;typeName&gt;(Name of the type to use. Deprecated since Elasticsearch v7)&lt;/typeName&gt;
  *      &lt;ignoreResponseErrors&gt;[false|true]&lt;/ignoreResponseErrors&gt;
  *      &lt;discoverNodes&gt;[false|true]&lt;/discoverNodes&gt;
  *      &lt;dotReplacement&gt;
@@ -196,7 +206,7 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *      &lt;fixBadIds&gt;
  *         [false|true](Forces references to fit into Elasticsearch _id field.)
  *      &lt;/fixBadIds&gt;
- *  
+ *
  *      &lt;!-- Use the following if authentication is required. --&gt;
  *      &lt;username&gt;(Optional user name)&lt;/username&gt;
  *      &lt;password&gt;(Optional user password)&lt;/password&gt;
@@ -205,15 +215,15 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *      &lt;passwordKeySource&gt;[key|file|environment|property]&lt;/passwordKeySource&gt;
  *
  *      &lt;sourceReferenceField keep="[false|true]"&gt;
- *         (Optional name of field that contains the document reference, when 
+ *         (Optional name of field that contains the document reference, when
  *         the default document reference is not used.  The reference value
- *         will be mapped to the Elasticsearch ID field. 
- *         Once re-mapped, this metadata source field is 
+ *         will be mapped to the Elasticsearch ID field.
+ *         Once re-mapped, this metadata source field is
  *         deleted, unless "keep" is set to <code>true</code>.)
  *      &lt;/sourceReferenceField&gt;
  *      &lt;sourceContentField keep="[false|true]"&gt;
- *         (If you wish to use a metadata field to act as the document 
- *         "content", you can specify that field here.  Default 
+ *         (If you wish to use a metadata field to act as the document
+ *         "content", you can specify that field here.  Default
  *         does not take a metadata field but rather the document content.
  *         Once re-mapped, the metadata source field is deleted,
  *         unless "keep" is set to <code>true</code>.)
@@ -233,29 +243,28 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  * </pre>
  * <p>
  * XML configuration entries expecting millisecond durations
- * can be provided in human-readable format (English only), as per 
+ * can be provided in human-readable format (English only), as per
  * {@link DurationParser} (e.g., "5 minutes and 30 seconds" or "5m30s").
  * </p>
- * 
+ *
  * <h4>Usage example:</h4>
  * <p>
- * The following example uses the minimum required settings, on the local host.  
- * </p> 
+ * The following example uses the minimum required settings, on the local host.
+ * </p>
  * <pre>
  *  &lt;committer class="com.norconex.committer.elasticsearch.ElasticsearchCommitter"&gt;
  *      &lt;indexName&gt;some_index&lt;/indexName&gt;
- *      &lt;typeName&gt;some_type&lt;/typeName&gt;
  *  &lt;/committer&gt;
  * </pre>
- *  
+ *
  * @author Pascal Essiembre
  */
 public class ElasticsearchCommitter extends AbstractMappedCommitter {
 
-    private static final Logger LOG = 
+    private static final Logger LOG =
             LogManager.getLogger(ElasticsearchCommitter.class);
 
-    public static final String DEFAULT_NODE = "http://localhost:9200"; 
+    public static final String DEFAULT_NODE = "http://localhost:9200";
     public static final String DEFAULT_ES_CONTENT_FIELD = "content";
     /** @since 4.1.0 */
     public static final int DEFAULT_CONNECTION_TIMEOUT = 1000;
@@ -289,7 +298,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         setTargetContentField(DEFAULT_ES_CONTENT_FIELD);
     }
     /**
-     * Gets Elasticsearch cluster node URLs. 
+     * Gets Elasticsearch cluster node URLs.
      * Defaults to "http://localhost:9200".
      * @return Elasticsearch nodes
      */
@@ -304,7 +313,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     public void setNodes(String... nodes) {
         this.nodes = nodes;
     }
-    
+
 	/**
      * Gets the index name.
      * @return index name
@@ -328,7 +337,8 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         return typeName;
     }
     /**
-     * Sets the type name.
+     * Sets the type name. Setting type name is deprecated if you
+     * are using Elasticsearch 7.0 or higher.
      * @param typeName type name
      */
     public void setTypeName(String typeName) {
@@ -337,7 +347,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
 
     /**
      * Gets the regular expression matching fields that contains a JSON
-     * object for its value (as opposed to a regular string). 
+     * object for its value (as opposed to a regular string).
      * Default is <code>null</code>.
      * @return regular expression
      * @since 4.1.0
@@ -356,8 +366,8 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     }
 
     /**
-     * Whether to ignore response errors.  By default, an exception is 
-     * thrown if the Elasticsearch response contains an error.  
+     * Whether to ignore response errors.  By default, an exception is
+     * thrown if the Elasticsearch response contains an error.
      * When <code>true</code> the errors are logged instead.
      * @return <code>true</code> when ignoring response errors
      */
@@ -365,11 +375,11 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         return ignoreResponseErrors;
     }
     /**
-     * Sets whether to ignore response errors.  
-     * When <code>false</code>, an exception is 
-     * thrown if the Elasticsearch response contains an error.  
+     * Sets whether to ignore response errors.
+     * When <code>false</code>, an exception is
+     * thrown if the Elasticsearch response contains an error.
      * When <code>true</code> the errors are logged instead.
-     * @param ignoreResponseErrors <code>true</code> when ignoring response 
+     * @param ignoreResponseErrors <code>true</code> when ignoring response
      *        errors
      */
     public void setIgnoreResponseErrors(boolean ignoreResponseErrors) {
@@ -386,7 +396,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     }
     /**
      * Sets whether automatic discovery of Elasticsearch cluster nodes should be
-     * enabled. 
+     * enabled.
      * @param discoverNodes <code>true</code> if enabled
      */
     public void setDiscoverNodes(boolean discoverNodes) {
@@ -421,7 +431,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
      */
     public void setPassword(String password) {
         this.password = password;
-    }    
+    }
 
     /**
      * Gets the password encryption key.
@@ -441,10 +451,10 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     public void setPasswordKey(EncryptionKey passwordKey) {
         this.passwordKey = passwordKey;
     }
-    
+
     /**
-     * Gets the character used to replace dots in field names. 
-     * Default is <code>null</code> (does not replace dots). 
+     * Gets the character used to replace dots in field names.
+     * Default is <code>null</code> (does not replace dots).
      * @return replacement character or <code>null</code>
      */
     public String getDotReplacement() {
@@ -457,7 +467,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     public void setDotReplacement(String dotReplacement) {
         this.dotReplacement = dotReplacement;
     }
-    
+
     /**
      * Gets Elasticsearch connection timeout.
      * @return milliseconds
@@ -494,6 +504,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
      * Gets Elasticsearch maximum amount of time to wait before retrying
      * a failing host.
      * return milliseconds
+     * @return max retry timeout
      * @since 4.1.0
      */
     public int getMaxRetryTimeout() {
@@ -508,11 +519,11 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     public void setMaxRetryTimeout(int maxRetryTimeout) {
         this.maxRetryTimeout = maxRetryTimeout;
     }
-    
+
     /**
      * Gets whether to fix IDs that are too long for Elasticsearch
-     * ID limitation (512 bytes max). If <code>true</code>, 
-     * long IDs will be truncated and a hash code representing the 
+     * ID limitation (512 bytes max). If <code>true</code>,
+     * long IDs will be truncated and a hash code representing the
      * truncated part will be appended.
      * @return <code>true</code> to fix IDs that are too long
      * @since 4.1.0
@@ -522,26 +533,26 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     }
     /**
      * Sets whether to fix IDs that are too long for Elasticsearch
-     * ID limitation (512 bytes max). If <code>true</code>, 
-     * long IDs will be truncated and a hash code representing the 
+     * ID limitation (512 bytes max). If <code>true</code>,
+     * long IDs will be truncated and a hash code representing the
      * truncated part will be appended.
      * @param fixBadIds <code>true</code> to fix IDs that are too long
      * @since 4.1.0
      */
     public void setFixBadIds(boolean fixBadIds) {
         this.fixBadIds = fixBadIds;
-    }    
-    
+    }
+
     @Override
     public void commit() {
         super.commit();
         closeIfDone();
     }
-    
+
     //TODO The following is a super ugly hack to get around not having
     // a close() method (or equivalent) on the Committers yet.
     // So we check that the caller is not itself, which means it should
-    // be the parent framework, which should in theory, call this only 
+    // be the parent framework, which should in theory, call this only
     // once. This is safe to do as the worst case scenario is that a new
     // client is re-created.
     // Remove this method once proper init/close is added to Committers
@@ -562,21 +573,21 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         sniffer = null;
         LOG.info("Elasticsearch RestClient closed.");
     }
-    
+
     @Override
     protected void commitBatch(List<ICommitOperation> batch) {
         RestClient safeClient = nullSafeRestClient();
-        
+
         StringBuilder json = new StringBuilder();
-        
-        LOG.info("Sending " + batch.size() 
+
+        LOG.info("Sending " + batch.size()
                 + " commit operations to Elasticsearch.");
         try {
             for (ICommitOperation op : batch) {
                 if (op instanceof IAddOperation) {
                     appendAddOperation(json, (IAddOperation) op);
                 } else if (op instanceof IDeleteOperation) {
-                    appendDeleteOperation(json, (IDeleteOperation) op); 
+                    appendDeleteOperation(json, (IDeleteOperation) op);
                 } else {
                     close();
                     throw new CommitterException("Unsupported operation:" + op);
@@ -601,7 +612,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         }
     }
 
-    private void handleResponse(Response response) 
+    private void handleResponse(Response response)
             throws IOException {
         HttpEntity respEntity = response.getEntity();
         if (respEntity != null) {
@@ -610,8 +621,8 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Elasticsearch response:\n" + responseAsString);
             }
-            
-            // We have no need to parse the JSON if successful 
+
+            // We have no need to parse the JSON if successful
             // (saving on the parsing). We'll do it on errors only
             // to filter out successful ones and report only the errors
             if (StringUtils.substring(
@@ -635,12 +646,12 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                   "Invalid HTTP response: " + response.getStatusLine());
         }
     }
-    
+
     private String extractResponseErrors(String response) {
         StringBuilder error = new StringBuilder();
         JSONObject json = new JSONObject(response);
         JSONArray items = json.getJSONArray("items");
-        
+
         for (int i = 0; i < items.length(); i++) {
             JSONObject index = items.getJSONObject(i).getJSONObject("index");
             if (index.has("error")) {
@@ -654,7 +665,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         error.insert(0, "Elasticsearch returned one or more errors:\n[");
         return error.toString();
     }
-    
+
     private void appendAddOperation(StringBuilder json, IAddOperation add) {
         String id = add.getMetadata().getString(getSourceReferenceField());
         if (StringUtils.isBlank(id)) {
@@ -662,13 +673,15 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         }
         json.append("{\"index\":{");
         append(json, "_index", getIndexName());
-        append(json.append(','), "_type", getTypeName());
+        if (StringUtils.isNotBlank(getTypeName())) {
+            append(json.append(','), "_type", getTypeName());
+        }
         append(json.append(','), "_id", fixBadIdValue(id));
         json.append("}}\n{");
         boolean first = true;
         for (Entry<String, List<String>> entry : add.getMetadata().entrySet()) {
             String field = entry.getKey();
-            field = StringUtils.replace(field, ".", dotReplacement); 
+            field = StringUtils.replace(field, ".", dotReplacement);
             // Remove id from source unless specified to keep it
             if (!isKeepSourceReferenceField()
                     && field.equals(getSourceReferenceField())) {
@@ -682,12 +695,14 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         }
         json.append("}\n");
     }
-    
+
     private void appendDeleteOperation(
             StringBuilder json, IDeleteOperation del) {
         json.append("{\"delete\":{");
         append(json, "_index", getIndexName());
-        append(json.append(','), "_type", getTypeName());
+        if (StringUtils.isNotBlank(getTypeName())) {
+            append(json.append(','), "_type", getTypeName());
+        }
         append(json.append(','), "_id", fixBadIdValue(del.getReference()));
         json.append("}}\n");
     }
@@ -710,16 +725,16 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         }
         json.append(']');
     }
-    
+
     private void append(StringBuilder json, String field, String value) {
         json.append('"')
             .append(StringEscapeUtils.escapeJson(field))
             .append("\":");
         appendValue(json, field, value);
     }
-    
+
     private void appendValue(StringBuilder json, String field, String value) {
-        if (getJsonFieldsPattern() != null 
+        if (getJsonFieldsPattern() != null
                 && getJsonFieldsPattern().matches(field)) {
             json.append(value);
         } else {
@@ -728,7 +743,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append("\"");
         }
     }
-    
+
     private String fixBadIdValue(String value) {
         if (StringUtils.isBlank(value)) {
             throw new CommitterException("Document id cannot be empty.");
@@ -742,7 +757,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 LOG.error("Bad id detected (too long), but could not be "
                         + "truncated properly by byte size. Will truncate "
                         + "based on characters size instead, which may not "
-                        + "work on IDs containing multi-byte characters."); 
+                        + "work on IDs containing multi-byte characters.");
                 v = StringUtil.truncateWithHash(value, 512, "!");
             }
             if (LOG.isDebugEnabled() && !value.equals(v)) {
@@ -753,15 +768,12 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         }
         return value;
     }
-    
-    
+
+
     private synchronized RestClient nullSafeRestClient() {
         if (client == null) {
             if (StringUtils.isBlank(getIndexName())) {
                 throw new CommitterException("Index name is undefined.");
-            }
-            if (StringUtils.isBlank(getTypeName())) {
-                throw new CommitterException("Type name is undefined.");
             }
             client = createRestClient();
         }
@@ -770,14 +782,14 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         }
         return client;
     }
-    
+
     protected RestClient createRestClient() {
         String[] elasticHosts = getNodes();
         HttpHost[] httpHosts = new HttpHost[elasticHosts.length];
         for (int i = 0; i < elasticHosts.length; i++) {
             httpHosts[i] = HttpHost.create(elasticHosts[i]);
         }
-        
+
         RestClientBuilder builder = RestClient.builder(httpHosts);
         builder.setFailureListener(new FailureListener() {
             @Override
@@ -790,7 +802,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .setConnectTimeout(connectionTimeout)
                 .setSocketTimeout(socketTimeout));
         builder.setMaxRetryTimeoutMillis(maxRetryTimeout);
-        
+
         if (StringUtils.isNotBlank(getUsername())) {
             CredentialsProvider credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(
@@ -831,7 +843,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         w.writeElementInteger("socketTimeout", getSocketTimeout());
         w.writeElementInteger("maxRetryTimeout", getMaxRetryTimeout());
         w.writeElementBoolean("fixBadIds", isFixBadIds());
-        
+
         // Encrypted password:
         EncryptionKey key = getPasswordKey();
         if (key != null) {
@@ -857,7 +869,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         } else {
             setTargetContentField(DEFAULT_ES_CONTENT_FIELD);
         }
-        
+
         if (xml.getString("clusterName", null) != null) {
             LOG.warn("\"clusterName\" is deprecated and will be ignored.");
         }
@@ -884,7 +896,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         setMaxRetryTimeout((int) XMLConfigurationUtil.getDuration(
                 xml, "maxRetryTimeout", getMaxRetryTimeout()));
         setFixBadIds(xml.getBoolean("fixBadIds", isFixBadIds()));
-        
+
         // encrypted password:
         String xmlKey = xml.getString("passwordKey", null);
         String xmlSource = xml.getString("passwordKeySource", null);
@@ -896,7 +908,7 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
             setPasswordKey(new EncryptionKey(xmlKey, source));
         }
     }
-    
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

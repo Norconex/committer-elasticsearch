@@ -25,7 +25,7 @@
           <xs:all>
             <xs:element name="nodes" type="nonEmptyString" minOccurs="0" maxOccurs="1" />
             <xs:element name="indexName" type="nonEmptyString" minOccurs="1" maxOccurs="1" />
-            <xs:element name="typeName" type="nonEmptyString" minOccurs="1" maxOccurs="1" />
+            <xs:element name="typeName" type="nonEmptyString" minOccurs="0" maxOccurs="1" />
             <xs:element name="ignoreResponseErrors" type="xs:boolean" minOccurs="0" maxOccurs="1" />
             <xs:element name="discoverNodes" type="xs:boolean" minOccurs="0" maxOccurs="1" />
             <xs:element name="dotReplacement" type="xs:string" minOccurs="0" maxOccurs="1" />
