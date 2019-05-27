@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 Norconex Inc.
+/* Copyright 2013-2019 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package com.norconex.committer.elasticsearch;
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -38,17 +37,17 @@ import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.elasticsearch.client.Node;
+import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClient.FailureListener;
 import org.elasticsearch.client.RestClientBuilder;
-import org.elasticsearch.client.sniff.ElasticsearchHostsSniffer;
-import org.elasticsearch.client.sniff.HostsSniffer;
+import org.elasticsearch.client.sniff.ElasticsearchNodesSniffer;
+import org.elasticsearch.client.sniff.NodesSniffer;
 import org.elasticsearch.client.sniff.Sniffer;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -202,7 +201,6 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *      &lt;/jsonFieldsPattern&gt;
  *      &lt;connectionTimeout&gt;(milliseconds)&lt;/connectionTimeout&gt;
  *      &lt;socketTimeout&gt;(milliseconds)&lt;/socketTimeout&gt;
- *      &lt;maxRetryTimeout&gt;(milliseconds)&lt;/maxRetryTimeout&gt;
  *      &lt;fixBadIds&gt;
  *         [false|true](Forces references to fit into Elasticsearch _id field.)
  *      &lt;/fixBadIds&gt;
@@ -270,7 +268,11 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     public static final int DEFAULT_CONNECTION_TIMEOUT = 1000;
     /** @since 4.1.0 */
     public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
-    /** @since 4.1.0 */
+    /**
+     * @since 4.1.0
+     * @deprecated since 4.1.1
+     */
+    @Deprecated
     public static final int DEFAULT_MAX_RETRY_TIMEOUT = 30000;
 
     private RestClient client;
@@ -287,7 +289,6 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     private String jsonFieldsPattern;
     private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
     private int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
-    private int maxRetryTimeout = DEFAULT_MAX_RETRY_TIMEOUT;
     private boolean fixBadIds;
 
     /**
@@ -506,18 +507,24 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
      * return milliseconds
      * @return max retry timeout
      * @since 4.1.0
+     * @deprecated since 4.1.1
      */
+    @Deprecated
     public int getMaxRetryTimeout() {
-        return maxRetryTimeout;
+        LOG.warn("ElasticsearchCommitter#getMaxRetryTimeout() is deprecated.");
+        return 0;
     }
     /**
      * Sets Elasticsearch maximum amount of time to wait before retrying
      * a failing host.
      * @param maxRetryTimeout milliseconds
      * @since 4.1.0
+     * @deprecated since 4.1.1
      */
+    @Deprecated
     public void setMaxRetryTimeout(int maxRetryTimeout) {
-        this.maxRetryTimeout = maxRetryTimeout;
+        LOG.warn("ElasticsearchCommitter#setMaxRetryTimeout(int) is "
+                + "deprecated. Invoking this method has no effect.");
     }
 
     /**
@@ -596,10 +603,10 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("JSON POST:\n" + StringUtils.trim(json.toString()));
             }
-            StringEntity requestEntity = new StringEntity(
-                    json.toString(), ContentType.APPLICATION_JSON);
-            Response response = safeClient.performRequest(
-                    "POST", "/_bulk", Collections.emptyMap(), requestEntity);
+
+            Request request = new Request("POST", "/_bulk");
+            request.setJsonEntity(json.toString());
+            Response response = safeClient.performRequest(request);
             handleResponse(response);
             LOG.info("Done sending commit operations to Elasticsearch.");
         } catch (CommitterException e) {
@@ -793,15 +800,14 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         RestClientBuilder builder = RestClient.builder(httpHosts);
         builder.setFailureListener(new FailureListener() {
             @Override
-            public void onFailure(HttpHost host) {
-                LOG.error("Failure occured on node: \"" + host
+            public void onFailure(Node node) {
+                LOG.error("Failure occured on node: \"" + node.getName()
                         + "\". Check node logs.");
             }
         });
         builder.setRequestConfigCallback(rcb -> rcb
                 .setConnectTimeout(connectionTimeout)
                 .setSocketTimeout(socketTimeout));
-        builder.setMaxRetryTimeoutMillis(maxRetryTimeout);
 
         if (StringUtils.isNotBlank(getUsername())) {
             CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -818,11 +824,11 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
     protected Sniffer createSniffer(RestClient client) {
         // here we assume a cluster is either all https, or all https (no mix).
         if (ArrayUtils.isNotEmpty(nodes) && nodes[0].startsWith("https:")) {
-            HostsSniffer hostsSniffer = new ElasticsearchHostsSniffer(client,
-                    ElasticsearchHostsSniffer.DEFAULT_SNIFF_REQUEST_TIMEOUT,
-                    ElasticsearchHostsSniffer.Scheme.HTTPS);
-            return Sniffer.builder(client)
-                    .setHostsSniffer(hostsSniffer).build();
+            NodesSniffer nodesSniffer = new ElasticsearchNodesSniffer(client,
+                    ElasticsearchNodesSniffer.DEFAULT_SNIFF_REQUEST_TIMEOUT,
+                    ElasticsearchNodesSniffer.Scheme.HTTPS);
+            return Sniffer.builder(
+                    client).setNodesSniffer(nodesSniffer).build();
         }
         return Sniffer.builder(client).build();
     }
@@ -841,7 +847,6 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
         w.writeElementString("jsonFieldsPattern", getJsonFieldsPattern());
         w.writeElementInteger("connectionTimeout", getConnectionTimeout());
         w.writeElementInteger("socketTimeout", getSocketTimeout());
-        w.writeElementInteger("maxRetryTimeout", getMaxRetryTimeout());
         w.writeElementBoolean("fixBadIds", isFixBadIds());
 
         // Encrypted password:
@@ -893,8 +898,12 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 xml, "connectionTimeout", getConnectionTimeout()));
         setSocketTimeout((int) XMLConfigurationUtil.getDuration(
                 xml, "socketTimeout", getSocketTimeout()));
-        setMaxRetryTimeout((int) XMLConfigurationUtil.getDuration(
-                xml, "maxRetryTimeout", getMaxRetryTimeout()));
+
+        String duration = xml.getString("maxRetryTimeout", null);
+        if (StringUtils.isNotBlank(duration)) {
+            LOG.warn("\"maxRetryTimeout\" is now deprecated and has no "
+                    + "replacement. Setting it has no effect.");
+        }
         setFixBadIds(xml.getBoolean("fixBadIds", isFixBadIds()));
 
         // encrypted password:
@@ -925,7 +934,6 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append(jsonFieldsPattern)
                 .append(connectionTimeout)
                 .append(socketTimeout)
-                .append(maxRetryTimeout)
                 .append(fixBadIds)
                 .toHashCode();
     }
@@ -956,7 +964,6 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append(jsonFieldsPattern, other.jsonFieldsPattern)
                 .append(connectionTimeout, other.connectionTimeout)
                 .append(socketTimeout, other.socketTimeout)
-                .append(maxRetryTimeout, other.maxRetryTimeout)
                 .append(fixBadIds, other.fixBadIds)
                 .isEquals();
     }
@@ -977,7 +984,6 @@ public class ElasticsearchCommitter extends AbstractMappedCommitter {
                 .append("jsonFieldsPattern", jsonFieldsPattern)
                 .append("connectionTimeout", connectionTimeout)
                 .append("socketTimeout", socketTimeout)
-                .append("maxRetryTimeout", maxRetryTimeout)
                 .append("fixBadIds", fixBadIds)
                 .toString();
     }
