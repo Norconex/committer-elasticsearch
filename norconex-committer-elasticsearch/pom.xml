@@ -1,5 +1,5 @@
 <!--
-   Copyright 2013-2017 Norconex Inc.
+   Copyright 2013-2019 Norconex Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.norconex.collectors</groupId>
   <artifactId>norconex-committer-elasticsearch</artifactId>
-  <version>4.1.1-SNAPSHOT</version>
+  <version>4.1.1</version>
   <name>Norconex Committer Elasticsearch</name>
   <description>Elasticsearch implementation of Norconex Committer.</description>
 
@@ -27,8 +27,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>    
     <site.baseurl />
-    <norconex-commons-lang.version>1.15.0</norconex-commons-lang.version>
-    <elasticsearch.version>7.1.0</elasticsearch.version>
+    <norconex-commons-lang.version>1.15.1</norconex-commons-lang.version>
+    <elasticsearch.version>7.5.1</elasticsearch.version>
   </properties>
   <inceptionYear>2013</inceptionYear>
 
@@ -78,7 +78,7 @@
     <dependency>
       <groupId>com.norconex.collectors</groupId>
       <artifactId>norconex-committer-core</artifactId>
-      <version>2.1.2</version>
+      <version>2.1.3</version>
     </dependency>
     <dependency>
       <groupId>org.elasticsearch.client</groupId>

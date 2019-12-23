@@ -7,14 +7,14 @@
   </properties>
   <body>
 
-    <release version="4.1.1-SNAPSHOT" date="2019-??-??" description="Maintenance release">
+    <release version="4.1.1" date="2019-12-22" description="Maintenance release">
       <action dev="essiembre" type="update">
         Configuration option "typeName" is now optional (as it is deprecated 
         for bulk requests in Elasticsearch 7 or higher).
       </action>      
       <action dev="essiembre" type="update">
-        Maven dependency updates: Elasticsearch REST client 7.1.0,
-        Norconex Commons Lang 1.15.0.
+        Maven dependency updates: Elasticsearch REST client 7.5.1,
+        Norconex Commons Lang 1.15.1, Norconex Committer Core 2.1.3.
       </action>      
     </release>
 
