@@ -7,6 +7,21 @@
   </properties>
   <body>
 
+    <release version="5.0.0-SNAPSHOT" date="2020-??-??" description="Feature release">
+      <action dev="essiembre" type="add">
+        Ability to perform field mappings.
+      </action>
+      <action dev="essiembre" type="update">
+        Major refactor to support Norconex Committer 3.x.
+      </action>      
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Elasticsearch REST client 7.6.2.
+      </action>      
+      <action dev="essiembre" type="remove">
+        Removed "typeName" "configuration option (deprecated in Elasticsearch).
+      </action>
+    </release>
+
     <release version="4.1.1" date="2019-12-22" description="Maintenance release">
       <action dev="essiembre" type="update">
         Configuration option "typeName" is now optional (as it is deprecated 
