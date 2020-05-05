@@ -57,7 +57,6 @@ import org.slf4j.LoggerFactory;
 
 import com.norconex.committer.core3.CommitterException;
 import com.norconex.committer.core3.DeleteRequest;
-import com.norconex.committer.core3.FieldMapping;
 import com.norconex.committer.core3.ICommitterRequest;
 import com.norconex.committer.core3.UpsertRequest;
 import com.norconex.committer.core3.batch.AbstractBatchCommitter;
@@ -87,10 +86,10 @@ import com.norconex.commons.lang.xml.XML;
  * <h3>"content" field</h3>
  * <p>
  * By default the "body" of a document is read as an input stream
- * and stored in a "content" field.  If you wish to use a metadata
- * field instead to represent your content, simply make sure to name it
- * "content" and it will be used instead.  You can change the target
- * field name with {@link #setTargetContentField(String)}.
+ * and stored in a "content" field.  You can change that target field name
+ * with {@link #setTargetContentField(String)}.  If you set the target
+ * content field to <code>null</code>, it will effectively skip storing
+ * the content stream.
  * </p>
  *
  * <h3>Dots (.) in field names</h3>
@@ -168,23 +167,16 @@ import com.norconex.commons.lang.xml.XML;
  *     {@nx.include com.norconex.commons.lang.security.Credentials@nx.xml.usage}
  *   </credentials>
  *
+ *   <sourceIdField>
+ *     (Optional document field name containing the value that will be stored
+ *     in Elasticsearch "_id" field. Default is the document reference.)
+ *   </sourceIdField>
  *   <targetContentField>
- *     (Optional target repository field name to store the document
+ *     (Optional Elasticsearch field name to store the document
  *     content/body. Default is "content".)
  *   </targetContentField>
  *
- *   <batchSize>
- *     (Max number of documents to send to Elasticsearch at once.
- *     A value too large may affect memory consumption.)
- *   </batchSize>
- *
-// *   <commitBatchSize>
-// *     (max number of documents to send to Elasticsearch at once)
-// *   </commitBatchSize>
- *   <queueDir>(optional path where to queue files)</queueDir>
-// *   <queueSize>(max queue size before committing)</queueSize>
- *   <maxRetries>(max retries upon commit failures)</maxRetries>
- *   <maxRetryWait>(max delay in milliseconds between retries)</maxRetryWait>
+ *   {@nx.include com.norconex.committer.core3.batch.AbstractBatchCommitter#options}
  * </committer>
  * }
  * <p>
@@ -239,6 +231,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
     private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
     private int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
     private boolean fixBadIds;
+    private String sourceIdField;
     private String targetContentField = DEFAULT_TARGET_CONTENT_FIELD;
 
     /**
@@ -246,8 +239,6 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
      */
     public ElasticsearchCommitter() {
         super();
-        getFieldMappings().setReferenceMapping(new FieldMapping(null, TARGET_ID_FIELD));
-        getFieldMappings().setContentMapping(new FieldMapping(null, DEFAULT_TARGET_CONTENT_FIELD));
     }
     /**
      * Gets an unmodifiable list of Elasticsearch cluster node URLs.
@@ -291,6 +282,25 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
         this.targetContentField = targetContentField;
     }
 
+    /**
+     * Gets the document field name containing the value to be stored
+     * in Elasticsearch "_id" field. Default is not a field, but rather
+     * the document reference.
+     * @return name of field containing id value
+     */
+    public String getSourceIdField() {
+        return sourceIdField;
+    }
+    /**
+     * Sets the document field name containing the value to be stored
+     * in Elasticsearch "_id" field. Set <code>null</code> to use the
+     * document reference instead of a field (default).
+     * @param sourceIdField name of field containing id value,
+     *        or <code>null</code>
+     */
+    public void setSourceIdField(String sourceIdField) {
+        this.sourceIdField = sourceIdField;
+    }
     /**
      * Gets the index name.
      * @return index name
@@ -464,6 +474,26 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
         }
     }
 
+    private String extractId(ICommitterRequest req) throws CommitterException {
+        String idValue = null;
+        if (StringUtils.isNotBlank(sourceIdField)) {
+            idValue = req.getMetadata().getString(sourceIdField);
+            if (StringUtils.isNotBlank(idValue)) {
+                // remove since remapped
+                req.getMetadata().remove(sourceIdField);
+            } else {
+                LOG.warn("Source ID field \"{}\" has no value. "
+                        + "Falling back to using document reference: {}",
+                        sourceIdField, req.getReference());
+            }
+        }
+        if (StringUtils.isBlank(idValue)) {
+            idValue = req.getReference();
+        }
+
+        return fixBadIdValue(idValue);
+    }
+
     @Override
     protected void commitBatch(Iterator<ICommitterRequest> it)
             throws CommitterException {
@@ -563,9 +593,14 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
 
     private void appendUpsertRequest(StringBuilder json, UpsertRequest req)
             throws CommitterException {
+
+        if (StringUtils.isNotBlank(targetContentField)) {
+            req.getMetadata().set(targetContentField, getContentAsString(req));
+        }
+
         json.append("{\"index\":{");
         append(json, "_index", getIndexName());
-        append(json.append(','), TARGET_ID_FIELD, resolveId(req));
+        append(json.append(','), TARGET_ID_FIELD, extractId(req));
         json.append("}}\n{");
         boolean first = true;
         for (Entry<String, List<String>> entry : req.getMetadata().entrySet()) {
@@ -588,16 +623,8 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
             throws CommitterException {
         json.append("{\"delete\":{");
         append(json, "_index", getIndexName());
-        append(json.append(','), TARGET_ID_FIELD, resolveId(req));
+        append(json.append(','), TARGET_ID_FIELD, extractId(req));
         json.append("}}\n");
-    }
-
-    private String resolveId(ICommitterRequest req) throws CommitterException {
-        String id = req.getMetadata().getString(TARGET_ID_FIELD);
-        if (StringUtils.isBlank(id)) {
-            id = req.getReference();
-        }
-        return fixBadIdValue(id);
     }
 
     private void append(StringBuilder json, String field, List<String> values) {
@@ -718,6 +745,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
         xml.addElement("connectionTimeout", getConnectionTimeout());
         xml.addElement("socketTimeout", getSocketTimeout());
         xml.addElement("fixBadIds", isFixBadIds());
+        xml.addElement("sourceIdField", getSourceIdField());
         xml.addElement("targetContentField", getTargetContentField());
     }
     @Override
@@ -736,8 +764,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
         setSocketTimeout(xml.getDurationMillis(
                 "socketTimeout", (long) getSocketTimeout()).intValue());
         setFixBadIds(xml.getBoolean("fixBadIds", isFixBadIds()));
-        setTargetContentField(xml.getString(
-                "targetContentField", getTargetContentField()));
+        setSourceIdField(xml.getString("sourceIdField", getSourceIdField()));
     }
 
     @Override
