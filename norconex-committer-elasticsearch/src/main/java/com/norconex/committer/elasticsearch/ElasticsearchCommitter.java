@@ -136,7 +136,7 @@ import com.norconex.commons.lang.xml.XML;
  *
  * <h3>Timeouts</h3>
  * <p>
- * <b>You can specify timeout values for when this committer sends documents
+ * You can specify timeout values for when this committer sends documents
  * to Elasticsearch.
  * </p>
  *
@@ -221,6 +221,12 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
     @EqualsExclude
     private final List<String> nodes =
             new ArrayList<>(Arrays.asList(DEFAULT_NODE));
+
+// count and log how many commit operations in total this session.
+//    @ToStringExclude
+//    @HashCodeExclude
+//    @EqualsExclude
+//    private AtomicLong totalSessionOperations;
 
     private String indexName;
     private boolean ignoreResponseErrors;
