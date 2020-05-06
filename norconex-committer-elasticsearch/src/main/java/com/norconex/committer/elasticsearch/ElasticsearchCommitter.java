@@ -511,6 +511,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
                 } else {
                     throw new CommitterException("Unsupported request:" + req);
                 }
+                docCount++;
             }
             if (LOG.isTraceEnabled()) {
                 LOG.trace("JSON POST:\n{}", StringUtils.trim(json.toString()));
@@ -765,6 +766,8 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
                 "socketTimeout", (long) getSocketTimeout()).intValue());
         setFixBadIds(xml.getBoolean("fixBadIds", isFixBadIds()));
         setSourceIdField(xml.getString("sourceIdField", getSourceIdField()));
+        setTargetContentField(xml.getString(
+                "targetContentField", getTargetContentField()));
     }
 
     @Override
