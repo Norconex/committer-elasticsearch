@@ -258,8 +258,8 @@
           <source>1.8</source>
           <detectLinks>false</detectLinks>
           <links>
-            <link>https://www.norconex.com/product/commons-lang/apidocs/</link>
-            <link>https://www.norconex.com/collectors/committer-core/latest/apidocs/</link>
+            <link>https://opensource.norconex.com/commons/lang/v1/apidocs/</link>
+            <link>https://opensource.norconex.com/committers/core/v2/apidocs/</link>
             <link>https://commons.apache.org/proper/commons-configuration/javadocs/v1.10/apidocs/</link>
           </links>
         </configuration>
@@ -391,7 +391,7 @@
   <distributionManagement>
     <site>
       <id>norconex-site-deployment</id>
-      <url>${site.baseurl}/collectors/committer-elasticsearch/latest</url>
+      <url>${site.baseurl}/committers/elasticsearch/v4</url>
     </site>
     <snapshotRepository>
       <id>ossrh</id>
@@ -432,7 +432,7 @@
           <header><![CDATA[
             <style>div.aboutLanguage .siteLink {font-size: 2em;}</style>
             <span class="siteLink">
-              <a target="_top" href="https://www.norconex.com/collectors/committer-elasticsearch">Norconex Elasticsearch Committer</a>
+              <a target="_top" href="https://opensource.norconex.com/committers/elasticsearch">Norconex Elasticsearch Committer</a>
             </span>
             ]]>
           </header>
@@ -458,8 +458,8 @@
           <source>1.8</source>
           <detectLinks>false</detectLinks>          
           <links>
-            <link>https://www.norconex.com/product/commons-lang/apidocs/</link>
-            <link>https://www.norconex.com/collectors/committer-core/latest/apidocs/</link>
+            <link>https://opensource.norconex.com/commons/lang/v1/apidocs/</link>
+            <link>https://opensource.norconex.com/committers/core/v2/apidocs/</link>
             <link>https://commons.apache.org/proper/commons-configuration/javadocs/v1.10/apidocs/</link>
           </links>          
         </configuration>
@@ -477,7 +477,7 @@
     </plugins>
   </reporting>
 
-  <url>https://www.norconex.com/collectors/committer-elasticsearch</url>
+  <url>https://opensource.norconex.com/committers/elasticsearch</url>
   <organization>
     <name>Norconex Inc.</name>
     <url>https://www.norconex.com</url>
