@@ -35,27 +35,11 @@
 
   <dependencies>
   
-    <!-- === Fix transitive dependencies versions: === -->  
     <dependency>
       <groupId>com.norconex.commons</groupId>
       <artifactId>norconex-commons-lang</artifactId>
     </dependency>
-    <!-- 
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.6</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-      <version>3.2.2</version>
-    </dependency>
-     -->
   
-  
-    <!--  === Other dependencies: === -->
-      
     <dependency>
       <groupId>com.norconex.collectors</groupId>
       <artifactId>norconex-committer-core</artifactId>
@@ -83,10 +67,6 @@
     <!-- This better for unit testing until ES comes up with embedded
          that gets a rest client. org.elasticsearch.test:framework 
          does not offer embedded ES.
-         
-         Do not go higher than 2.4.0 until this is fixed:
-         https://github.com/allegro/embedded-elasticsearch/issues/31
-         (or it will hang on Windows).
      -->
     <dependency>
       <groupId>pl.allegro.tech</groupId>
@@ -179,11 +159,11 @@
   <distributionManagement>
     <site>
       <id>norconex-site-deployment</id>
-      <url>${site.baseurl}/collectors/committer-elasticsearch/latest</url>
+      <url>${site.baseurl}/committers/elasticsearch/v5</url>
     </site>
   </distributionManagement>
 
-  <url>https://www.norconex.com/collectors/committer-elasticsearch</url>
+  <url>https://opensource.norconex.com/committers/elasticsearch</url>
   <scm>
     <url>https://github.com/Norconex/committer-elasticsearch</url>
     <connection>scm:git:git@github.com:Norconex/committer-elasticsearch.git</connection>
