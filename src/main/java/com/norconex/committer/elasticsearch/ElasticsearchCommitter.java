@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.norconex.committer.core3.CommitterException;
+import com.norconex.committer.core3.CommitterUtil;
 import com.norconex.committer.core3.DeleteRequest;
 import com.norconex.committer.core3.ICommitterRequest;
 import com.norconex.committer.core3.UpsertRequest;
@@ -140,6 +141,10 @@ import com.norconex.commons.lang.xml.XML;
  * to Elasticsearch.
  * </p>
  *
+ * {@nx.include com.norconex.committer.core3.AbstractCommitter#restrictTo}
+ *
+ * {@nx.include com.norconex.committer.core3.AbstractCommitter#fieldMappings}
+ *
  * {@nx.xml.usage
  * <committer class="com.norconex.committer.elasticsearch.ElasticsearchCommitter">
  *   <nodes>
@@ -202,8 +207,8 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
     private static final Logger LOG =
             LoggerFactory.getLogger(ElasticsearchCommitter.class);
 
-    public static final String TARGET_ID_FIELD = "_id";
-    public static final String DEFAULT_TARGET_CONTENT_FIELD = "content";
+    public static final String ELASTICSEARCH_ID_FIELD = "_id";
+    public static final String DEFAULT_ELASTICSEARCH_CONTENT_FIELD = "content";
     public static final String DEFAULT_NODE = "http://localhost:9200";
     public static final int DEFAULT_CONNECTION_TIMEOUT = 1000;
     public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
@@ -222,12 +227,6 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
     private final List<String> nodes =
             new ArrayList<>(Arrays.asList(DEFAULT_NODE));
 
-// count and log how many commit operations in total this session.
-//    @ToStringExclude
-//    @HashCodeExclude
-//    @EqualsExclude
-//    private AtomicLong totalSessionOperations;
-
     private String indexName;
     private boolean ignoreResponseErrors;
     private boolean discoverNodes;
@@ -238,7 +237,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
     private int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
     private boolean fixBadIds;
     private String sourceIdField;
-    private String targetContentField = DEFAULT_TARGET_CONTENT_FIELD;
+    private String targetContentField = DEFAULT_ELASTICSEARCH_CONTENT_FIELD;
 
     /**
      * Constructor.
@@ -274,6 +273,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
 
     /**
      * Gets the name of the Elasticsearch field where content will be stored.
+     * Default is "content".
      * @return field name
      */
 	public String getTargetContentField() {
@@ -481,23 +481,8 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
     }
 
     private String extractId(ICommitterRequest req) throws CommitterException {
-        String idValue = null;
-        if (StringUtils.isNotBlank(sourceIdField)) {
-            idValue = req.getMetadata().getString(sourceIdField);
-            if (StringUtils.isNotBlank(idValue)) {
-                // remove since remapped
-                req.getMetadata().remove(sourceIdField);
-            } else {
-                LOG.warn("Source ID field \"{}\" has no value. "
-                        + "Falling back to using document reference: {}",
-                        sourceIdField, req.getReference());
-            }
-        }
-        if (StringUtils.isBlank(idValue)) {
-            idValue = req.getReference();
-        }
-
-        return fixBadIdValue(idValue);
+        return fixBadIdValue(
+                CommitterUtil.extractSourceIdValue(req, sourceIdField));
     }
 
     @Override
@@ -601,20 +586,19 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
     private void appendUpsertRequest(StringBuilder json, UpsertRequest req)
             throws CommitterException {
 
-        if (StringUtils.isNotBlank(targetContentField)) {
-            req.getMetadata().set(targetContentField, getContentAsString(req));
-        }
+
+        CommitterUtil.applyTargetContent(req, targetContentField);
 
         json.append("{\"index\":{");
         append(json, "_index", getIndexName());
-        append(json.append(','), TARGET_ID_FIELD, extractId(req));
+        append(json.append(','), ELASTICSEARCH_ID_FIELD, extractId(req));
         json.append("}}\n{");
         boolean first = true;
         for (Entry<String, List<String>> entry : req.getMetadata().entrySet()) {
             String field = entry.getKey();
             field = StringUtils.replace(field, ".", dotReplacement);
             // Do not store _id as a field since it is passed above already.
-            if (field.equals(TARGET_ID_FIELD)) {
+            if (field.equals(ELASTICSEARCH_ID_FIELD)) {
                 continue;
             }
             if (!first) {
@@ -630,7 +614,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
             throws CommitterException {
         json.append("{\"delete\":{");
         append(json, "_index", getIndexName());
-        append(json.append(','), TARGET_ID_FIELD, extractId(req));
+        append(json.append(','), ELASTICSEARCH_ID_FIELD, extractId(req));
         json.append("}}\n");
     }
 

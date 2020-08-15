@@ -14,63 +14,70 @@
  */
 package com.norconex.committer.elasticsearch;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
+
+import org.apache.commons.lang3.ClassUtils;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import com.norconex.committer.core3.batch.queue.impl.FSQueue;
+import com.norconex.commons.lang.map.PropertyMatcher;
+import com.norconex.commons.lang.security.Credentials;
+import com.norconex.commons.lang.text.TextMatcher;
+import com.norconex.commons.lang.xml.XML;
+
 public class ElasticsearchCommitterConfigTest {
 
-//    @Test
-//    public void testWriteRead() throws Exception {
-//        ElasticsearchCommitter committer = new ElasticsearchCommitter();
-//        committer.setQueueDir("my-queue-dir");
-//        committer.setSourceContentField("sourceContentField");
-//        committer.setTargetContentField("targetContentField");
-//        committer.setSourceReferenceField("idField");
-//        committer.setKeepSourceContentField(true);
-//        committer.setKeepSourceReferenceField(false);
-//        committer.setQueueSize(10);
-//        committer.setCommitBatchSize(1);
-//        committer.setIndexName("my-inxed");
-//        committer.setTypeName("my-type");
-//        committer.setNodes("http://localhost:9200", "http://somewhere.com");
-//        committer.setDiscoverNodes(true);
-//        committer.setDotReplacement("_");
-//        committer.setIgnoreResponseErrors(true);
-//        committer.setUsername("username");
-//        committer.setPassword("password");
-//        committer.setPasswordKey(
-//                new EncryptionKey("encValue", Source.ENVIRONMENT));
-//        committer.setJsonFieldsPattern("jsonFieldPattern");
-//        committer.setConnectionTimeout(200);
-//        committer.setSocketTimeout(300);
-//
-//        System.out.println("Writing/Reading this: " + committer);
-//        XMLConfigurationUtil.assertWriteRead(committer);
-//    }
-//
-//    @Test
-//    public void testUnsupportedIdTargetField() throws Exception {
-//        ElasticsearchCommitter committer = new ElasticsearchCommitter();
-//        String xml = "<committer><targetReferenceField>"
-//                + "newid</targetReferenceField></committer>";
-//        XMLConfiguration config = XMLConfigurationUtil.newXMLConfiguration(
-//                new StringReader(xml));
-//        try {
-//            committer.loadFromXml(config);
-//            fail("Expected exception because idTargetField is not supported");
-//        } catch (Exception e) {
-//            // Expected
-//        }
-//    }
-//
-//    @Test
-//    public void testValidation() throws IOException {
-//        CountingConsoleAppender appender = new CountingConsoleAppender();
-//        appender.startCountingFor(XMLConfigurationUtil.class, Level.WARN);
-//        try (Reader r = new InputStreamReader(getClass().getResourceAsStream(
-//                ClassUtils.getShortClassName(getClass()) + ".xml"))) {
-//            XMLConfigurationUtil.newInstance(r);
-//        } finally {
-//            appender.stopCountingFor(XMLConfigurationUtil.class);
-//        }
-//        Assert.assertEquals("Validation warnings/errors were found.",
-//                0, appender.getCount());
-//    }
+    @Test
+    public void testWriteRead() throws Exception {
+        ElasticsearchCommitter c = new ElasticsearchCommitter();
+
+        FSQueue q = new FSQueue();
+        q.setBatchSize(10);
+        q.setMaxPerFolder(5);
+        c.setCommitterQueue(q);
+
+        Credentials creds = new Credentials();
+        creds.setPassword("mypassword");
+        creds.setUsername("myusername");
+        c.setCredentials(creds);
+
+        c.setFieldMapping("subject", "title");
+        c.setFieldMapping("body", "content");
+
+        c.getRestrictions().add(new PropertyMatcher(
+                TextMatcher.basic("document.reference"),
+                TextMatcher.wildcard("*.pdf")));
+        c.getRestrictions().add(new PropertyMatcher(
+                TextMatcher.basic("title"),
+                TextMatcher.wildcard("Nah!")));
+
+        c.setSourceIdField("mySourceIdField");
+        c.setTargetContentField("myTargetContentField");
+
+
+        c.setIndexName("my-inxed");
+        c.setNodes("http://localhost:9200", "http://somewhere.com");
+        c.setDiscoverNodes(true);
+        c.setDotReplacement("_");
+        c.setIgnoreResponseErrors(true);
+        c.setJsonFieldsPattern("jsonFieldPattern");
+        c.setConnectionTimeout(200);
+        c.setSocketTimeout(300);
+        c.setFixBadIds(true);
+
+        XML.assertWriteRead(c, "committer");
+    }
+
+    @Test
+    void testValidation() {
+        Assertions.assertDoesNotThrow(() -> {
+            try (Reader r = new InputStreamReader(getClass().getResourceAsStream(
+                    ClassUtils.getShortClassName(getClass()) + ".xml"))) {
+                XML xml = XML.of(r).create();
+                xml.toObjectImpl(ElasticsearchCommitter.class);
+            }
+        });
+    }
 }
