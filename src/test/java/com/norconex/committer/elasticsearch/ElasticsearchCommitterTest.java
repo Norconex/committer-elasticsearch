@@ -78,7 +78,8 @@ class ElasticsearchCommitterTest {
     @Container
     static ElasticsearchContainer container = new ElasticsearchContainer(
             new DockerImageName(
-                    "docker.elastic.co/elasticsearch/elasticsearch-oss",
+//                    "docker.elastic.co/elasticsearch/elasticsearch-oss",
+                    "docker.elastic.co/elasticsearch/elasticsearch",
                     TEST_ES_VERSION).toString());
 
 
