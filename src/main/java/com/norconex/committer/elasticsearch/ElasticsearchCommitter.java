@@ -746,7 +746,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
         setIgnoreResponseErrors(xml.getBoolean(
                 "ignoreResponseErrors", isIgnoreResponseErrors()));
         setDiscoverNodes(xml.getBoolean("discoverNodes", isDiscoverNodes()));
-        credentials.loadFromXML(xml.getXML("credentials"));
+        xml.ifXML("credentials", x -> x.populate(credentials));
         setDotReplacement(xml.getString("dotReplacement", getDotReplacement()));
         setJsonFieldsPattern(
                 xml.getString("jsonFieldsPattern", getJsonFieldsPattern()));
