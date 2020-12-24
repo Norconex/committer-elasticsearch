@@ -108,8 +108,8 @@
           <tagletArtifacts combine.children="append">
             <tagletArtifact>
               <groupId>com.norconex.collectors</groupId>
-              <artifactId>norconex-importer</artifactId>
-              <version>${norconex-importer.version}</version>
+              <artifactId>norconex-committer-core</artifactId>
+              <version>${norconex-committer-core.version}</version>
             </tagletArtifact>
           </tagletArtifacts>
         </configuration>
