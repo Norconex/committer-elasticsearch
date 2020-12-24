@@ -54,6 +54,7 @@ import com.norconex.committer.core3.CommitterContext;
 import com.norconex.committer.core3.CommitterException;
 import com.norconex.committer.core3.DeleteRequest;
 import com.norconex.committer.core3.UpsertRequest;
+import com.norconex.commons.lang.ExceptionUtil;
 import com.norconex.commons.lang.TimeIdGenerator;
 import com.norconex.commons.lang.io.IOUtil;
 import com.norconex.commons.lang.map.Properties;
@@ -315,7 +316,8 @@ class ElasticsearchCommitterTest {
             Assertions.fail("Failed to throw exception.");
         } catch (CommitterException e) {
             assertEquals(2, StringUtils.countMatches(
-                    e.getMessage(), "\"error\":"), "Wrong error count.");
+                    ExceptionUtil.getFormattedMessages(e),
+                    "\"error\":"), "Wrong error count.");
         }
     }
 
@@ -384,10 +386,10 @@ class ElasticsearchCommitterTest {
     protected ElasticsearchCommitter createESCommitter()
             throws CommitterException {
 
-        CommitterContext ctx = CommitterContext.build()
+        CommitterContext ctx = CommitterContext.builder()
                 .setWorkDir(new File(tempDir,
                         "" + TimeIdGenerator.next()).toPath())
-                .create();
+                .build();
         ElasticsearchCommitter committer = new ElasticsearchCommitter();
         committer.setNodes(container.getHttpHostAddress());
         committer.setIndexName(TEST_INDEX);
