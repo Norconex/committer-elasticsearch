@@ -201,7 +201,6 @@ import com.norconex.commons.lang.xml.XML;
  * </p>
  * @author Pascal Essiembre
  */
-@SuppressWarnings("javadoc")
 public class ElasticsearchCommitter extends AbstractBatchCommitter {
 
     private static final Logger LOG =
@@ -239,12 +238,6 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
     private String sourceIdField;
     private String targetContentField = DEFAULT_ELASTICSEARCH_CONTENT_FIELD;
 
-    /**
-     * Constructor.
-     */
-    public ElasticsearchCommitter() {
-        super();
-    }
     /**
      * Gets an unmodifiable list of Elasticsearch cluster node URLs.
      * Defaults to "http://localhost:9200".

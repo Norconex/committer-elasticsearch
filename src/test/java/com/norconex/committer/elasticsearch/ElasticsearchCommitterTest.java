@@ -1,4 +1,4 @@
-/* Copyright 2013-2020 Norconex Inc.
+/* Copyright 2013-2021 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import com.norconex.commons.lang.TimeIdGenerator;
 import com.norconex.commons.lang.io.IOUtil;
 import com.norconex.commons.lang.map.Properties;
 
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 class ElasticsearchCommitterTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -79,35 +79,20 @@ class ElasticsearchCommitterTest {
     @Container
     static ElasticsearchContainer container = new ElasticsearchContainer(
             new DockerImageName(
-//                    "docker.elastic.co/elasticsearch/elasticsearch-oss",
                     "docker.elastic.co/elasticsearch/elasticsearch",
                     TEST_ES_VERSION).toString());
 
 
     private static RestClient restClient;
-//    private static String node;
 
     @BeforeAll
     static void beforeAll() throws Exception {
-//        elastic = EmbeddedElastic.builder()
-//                .withElasticVersion(TEST_ES_VERSION)
-//                .withSetting(PopularProperties.CLUSTER_NAME, "test_cluster")
-//                .withStartTimeout(5, TimeUnit.MINUTES)
-//                .build()
-//                .start();
-//
-//        node = "http://localhost:" + elastic.getHttpPort();
-//
-//        restClient = RestClient.builder(HttpHost.create(node)).build();
         restClient = RestClient.builder(
                 HttpHost.create(container.getHttpHostAddress())).build();
     }
 
     @BeforeEach
     void beforeEach() throws Exception {
-//        restClient = RestClient.builder(
-//                HttpHost.create(container.getHttpHostAddress())).build();
-
         if (restClient.performRequest(new Request("HEAD", "/" + TEST_INDEX))
                 .getStatusLine().getStatusCode() == 200) {
             performRequest("DELETE", "/" + TEST_INDEX);
@@ -117,18 +102,9 @@ class ElasticsearchCommitterTest {
 
     }
 
-//    @AfterEach
-//    void afterEach() {
-//        IOUtil.closeQuietly(restClient);
-//    }
-
-
     @AfterAll
     static void afterAll() {
         IOUtil.closeQuietly(restClient);
-//        if (elastic != null) {
-//            elastic.stop();
-//        }
     }
 
     @Test
