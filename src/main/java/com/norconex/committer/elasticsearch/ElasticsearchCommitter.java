@@ -493,7 +493,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
                 } else if (req instanceof DeleteRequest) {
                     appendDeleteRequest(json, (DeleteRequest) req);
                 } else {
-                    throw new CommitterException("Unsupported request:" + req);
+                    throw new CommitterException("Unsupported request: " + req);
                 }
                 docCount++;
             }
