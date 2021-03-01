@@ -2,7 +2,7 @@
 
 Elasticsearch implementation of Norconex Committer.
 
-Website: http://www.norconex.com/collectors/committer-elasticsearch/
+Website: https://opensource.norconex.com/committers/elasticsearch/
 
 ## Compatibility Matrix
 
