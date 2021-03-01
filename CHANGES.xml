@@ -7,7 +7,7 @@
   </properties>
   <body>
 
-    <release version="5.0.0-SNAPSHOT" date="2020-??-??" description="Feature release">
+    <release version="5.0.0-M1" date="2021-03-01" description="Feature release">
       <action dev="essiembre" type="add">
         Ability to perform field mappings.
       </action>
