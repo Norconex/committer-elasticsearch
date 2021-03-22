@@ -7,6 +7,13 @@
   </properties>
   <body>
 
+    <release version="5.0.0-SNAPSHOT" date="2021-??-??" description="Feature release">
+      <action dev="essiembre" type="update">
+        Added back "typeName" support for backward compatibility with older
+        versions of Elasticsearch (lower than 7.0).
+      </action>
+    </release>
+
     <release version="5.0.0-M1" date="2021-03-01" description="Feature release">
       <action dev="essiembre" type="add">
         Ability to perform field mappings.
@@ -19,179 +26,6 @@
       </action>      
       <action dev="essiembre" type="remove">
         Removed "typeName" "configuration option (deprecated in Elasticsearch).
-      </action>
-    </release>
-
-    <release version="4.1.1" date="2019-12-22" description="Maintenance release">
-      <action dev="essiembre" type="update">
-        Configuration option "typeName" is now optional (as it is deprecated 
-        for bulk requests in Elasticsearch 7 or higher).
-      </action>      
-      <action dev="essiembre" type="update">
-        Maven dependency updates: Elasticsearch REST client 7.5.1,
-        Norconex Commons Lang 1.15.1, Norconex Committer Core 2.1.3.
-      </action>      
-    </release>
-
-    <release version="4.1.0" date="2017-11-26" description="Feature release">
-      <action dev="essiembre" type="add">
-        New "fixBadIds" configuration options for modifying references
-        that are invalid for Elasticsearch ID limitations.
-      </action>
-      <action dev="essiembre" type="add" issue="22">
-        Added new "connectionTimeout" and "socketTimeout" options.
-      </action>
-      <action dev="essiembre" type="add" issue="16">
-        Can now consider specific field values as JSON objects.
-      </action>
-      <action dev="essiembre" type="update">
-        Maven dependency updates: Elasticsearch REST client 5.6.3,
-        Norconex Commons Lang 1.14.0.
-      </action>      
-    </release>
-
-    <release version="4.0.0" date="2017-07-20" description="Major release">
-      <action dev="essiembre" type="add">
-        Now uses Elasticsearch REST API (client version 5.4.0).
-      </action>
-      <action dev="essiembre" type="add">
-        Added basic authentication support for password-protected clusters.
-      </action>
-      <action dev="essiembre" type="add">
-        New "ignoreResponseErrors" flag to log errors from a node response
-        as opposed to throw an exception.
-      </action>
-      <action dev="essiembre" type="add">
-        New "discoverNodes" flag to automatically discover nodes in a cluster
-        beyond those defined explicitly.
-      </action>
-      <action dev="essiembre" type="add">
-        Now ships with encrypt utility scripts.
-      </action>
-      <action dev="essiembre" type="update">
-        Dots are no longer replaced with underscore by default. Now 
-        configurable with "dotReplacement" option.
-      </action>
-      <action dev="essiembre" type="update">
-        The "clusterName" and "clusterHosts" configuration options were
-        replaced with "nodes".
-      </action>
-      <action dev="essiembre" type="update">
-        Maven dependency updates: Norconex Committer Core 2.1.1.
-      </action>
-      <action dev="essiembre" type="remove">
-        Removed support for Elasticsearch Transport Client.  Elasticsearch
-        will eventually drop support for it in favor of the REST API.
-      </action>
-    </release>
-
-    <release version="3.0.0" date="2017-04-25" description="Major release">
-      <action dev="essiembre" type="add">
-        Added schema-based XML configuration validation.
-      </action>
-      <action dev="essiembre" type="add">
-        Now distributed with utility scripts.
-      </action>
-      <action dev="essiembre" type="update">
-        XML configuration entries expecting millisecond durations
-        can now be provided in human-readable format 
-        (e.g., "5 minutes and 30 seconds" or "5m30s").
-      </action>      
-      <action dev="essiembre" type="update">
-        Upgraded to support Elasticsearch 5.3.1 (but should work with other 5.x
-        versions). May not work with Elasticsearch 2.x.
-      </action>
-      <action dev="essiembre" type="update">
-        Maven dependency updates: Norconex Commons Lang 1.13.0,
-        Norconex Committer Core 2.1.0.
-      </action>
-      <action dev="essiembre" type="update">
-        Dot in field names are no longer converted to underscores
-        (since ES 5.x now supports them).
-      </action>
-      <action dev="essiembre" type="update">
-        Now requires Java 8+ to run (Elasticsearch requirement).
-      </action>
-      <action dev="essiembre" type="update">
-        Now includes new required dependencies: Apache Logging Log4J 
-        Api/Core 2.7.
-      </action>
-      <action dev="essiembre" type="remove">
-        Connecting via Node Client is no longer supported.  Only transport
-        client is now supported (node client is not officially supported by 
-        Elasticsearch).
-      </action>
-    </release>
-
-    <release version="2.1.0" date="2016-08-29" description="Feature release">
-      <action dev="essiembre" type="add">
-        Now ships with new install script that automates copying of dependent 
-        libraries, taking into account possible version conflicts.
-      </action>
-      <action dev="dimassip" type="update">
-        Upgraded to Elasticsearch 2.3.5, Norconex Committer Core 2.0.5,
-        Norconex Commons Lang 1.12.0, Apache Commons Lang 2.6.
-      </action>
-    </release>
-    
-    <release version="2.0.2" date="2015-12-23" description="Maintenance release">
-      <action dev="dimassip" type="update">
-        Upgraded to Elasticsearch 1.7.4
-      </action>
-      <action dev="dimassip" type="fix">
-        Fixed not handling array values properly.
-      </action>
-    </release>
-
-    <release version="2.0.1" date="2015-03-31" description="Maintenance release">
-      <action dev="dimassip" type="fix">
-        Fixed unstable unit tests.
-      </action>
-      <action dev="essiembre" type="update">
-        Updated several maven plugins and added SonarQube maven plugin.
-      </action>
-      <action dev="essiembre" type="update">
-        Library updates: Elasticsearch API 1.5.0, Norconex Committer Core 2.0.1,
-        JUnit 4.12, Apache Commons Codec 1.10.
-      </action>
-      <action dev="essiembre" type="update">
-        Added Sonatype repository to pom.xml for snapshot releases.
-      </action>
-    </release>
-
-    <release version="2.0.0" date="2014-11-25" description="Major release">
-      <action dev="essiembre" type="update">
-        Now licensed under The Apache License, Version 2.0.
-      </action>
-      <action dev="essiembre" type="update">
-        Upgraded to work with Norconex Committer 2.0.0 (won't work with 
-        older versions).
-      </action>
-      <action dev="essiembre" type="update">
-        Document "id" is now referred as document "reference".
-      </action>
-      <action dev="essiembre" type="update">
-        Now requires Java 7 or higher.
-      </action>
-    </release>
-  
-    <release version="1.0.0" date="2014-03-09" description="Stable release">
-      <action dev="essiembre" type="add">
-        Can now retry on commit failures and specify a delay between retries.
-      </action>
-      <action dev="essiembre" type="update">
-        Upgraded to Committer version 1.2.0 and refactored code accordingly.
-      </action>
-      <action dev="essiembre" type="update">
-        "batchSize configuration option has been renamed to "queueSize".
-        "solrBatchSize" configuration options has been renamed to 
-        "committerBatchSize".
-      </action>
-    </release>
-
-    <release version="1.0.0-RC1" date="2013-06-05" description="Open Source release">
-      <action dev="dimassip" type="add">
-        Starting with this release, Norconex Elasticsearch Committer is open-source under GPL.
       </action>
     </release>
 

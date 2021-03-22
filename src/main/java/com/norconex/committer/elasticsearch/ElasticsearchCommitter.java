@@ -1,4 +1,4 @@
-/* Copyright 2013-2020 Norconex Inc.
+/* Copyright 2013-2021 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,6 +128,15 @@ import com.norconex.commons.lang.xml.XML;
  * majority of cases.
  * </p>
  *
+ * <h3>Type Name</h3>
+ * <p>
+ * As of Elasticsearch 7.0, the index type has been deprecated.
+ * If you are using Elasticsearch 7.0 or higher, do not configure the
+ * <code>typeName</code>. Doing so may cause errors.
+ * The <code>typeName</code> is available only for backward compatibility
+ * for those using this Committer with older versions of Elasticsearch.
+ * </p>
+ *
  * <h3>Authentication</h3>
  * <p>
  * Basic authentication is supported for password-protected clusters.
@@ -152,6 +161,9 @@ import com.norconex.commons.lang.xml.XML;
  *     Defaults to http://localhost:9200)
  *   </nodes>
  *   <indexName>(Name of the index to use)</indexName>
+ *   <typeName>
+ *     (Name of the type to use. Deprecated since Elasticsearch v7.)
+ *   </typeName>
  *   <ignoreResponseErrors>[false|true]</ignoreResponseErrors>
  *   <discoverNodes>[false|true]</discoverNodes>
  *   <dotReplacement>
@@ -227,6 +239,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
             new ArrayList<>(Arrays.asList(DEFAULT_NODE));
 
     private String indexName;
+    private String typeName;
     private boolean ignoreResponseErrors;
     private boolean discoverNodes;
     private final Credentials credentials = new Credentials();
@@ -313,6 +326,23 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
      */
     public void setIndexName(String indexName) {
         this.indexName = indexName;
+    }
+
+    /**
+     * Gets the type name. Type name is deprecated if you
+     * are using Elasticsearch 7.0 or higher and should be <code>null</code>.
+     * @return type name
+     */
+    public String getTypeName() {
+        return typeName;
+    }
+    /**
+     * Sets the type name. Type name is deprecated if you
+     * are using Elasticsearch 7.0 or higher and should be <code>null</code>.
+     * @param typeName type name
+     */
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
     /**
@@ -584,6 +614,9 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
 
         json.append("{\"index\":{");
         append(json, "_index", getIndexName());
+        if (StringUtils.isNotBlank(getTypeName())) {
+            append(json.append(','), "_type", getTypeName());
+        }
         append(json.append(','), ELASTICSEARCH_ID_FIELD, extractId(req));
         json.append("}}\n{");
         boolean first = true;
@@ -607,6 +640,9 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
             throws CommitterException {
         json.append("{\"delete\":{");
         append(json, "_index", getIndexName());
+        if (StringUtils.isNotBlank(getTypeName())) {
+            append(json.append(','), "_type", getTypeName());
+        }
         append(json.append(','), ELASTICSEARCH_ID_FIELD, extractId(req));
         json.append("}}\n");
     }
@@ -721,6 +757,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
     protected void saveBatchCommitterToXML(XML xml) {
         xml.addDelimitedElementList("nodes", getNodes());
         xml.addElement("indexName", getIndexName());
+        xml.addElement("typeName", getTypeName());
         xml.addElement("ignoreResponseErrors", isIgnoreResponseErrors());
         xml.addElement("discoverNodes", isDiscoverNodes());
         credentials.saveToXML(xml.addElement("credentials"));
@@ -736,6 +773,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
     protected void loadBatchCommitterFromXML(XML xml) {
         setNodes(xml.getDelimitedStringList("nodes"));
         setIndexName(xml.getString("indexName", getIndexName()));
+        setTypeName(xml.getString("typeName", getTypeName()));
         setIgnoreResponseErrors(xml.getBoolean(
                 "ignoreResponseErrors", isIgnoreResponseErrors()));
         setDiscoverNodes(xml.getBoolean("discoverNodes", isDiscoverNodes()));
