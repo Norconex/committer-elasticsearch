@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-   Copyright 2017-2020 Norconex Inc.
+   Copyright 2017-2021 Norconex Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@
       <xs:complexContent> 
         <xs:extension base="AbstractBatchCommitter">
           <xs:all>
-            <xs:element name="nodes" type="nonEmptyString" minOccurs="0" maxOccurs="1" />
-            <xs:element name="indexName" type="nonEmptyString" minOccurs="1" maxOccurs="1" />
+            <xs:element name="nodes" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="indexName" type="xs:string" minOccurs="1" maxOccurs="1" />
+            <xs:element name="typeName" type="xs:string" minOccurs="0" maxOccurs="1" />
             <xs:element name="ignoreResponseErrors" type="xs:boolean" minOccurs="0" maxOccurs="1" />
             <xs:element name="discoverNodes" type="xs:boolean" minOccurs="0" maxOccurs="1" />
             <xs:element name="dotReplacement" type="xs:string" minOccurs="0" maxOccurs="1" />
