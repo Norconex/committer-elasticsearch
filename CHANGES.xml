@@ -12,6 +12,9 @@
         Added back "typeName" support for backward compatibility with older
         versions of Elasticsearch (lower than 7.0).
       </action>
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Elasticsearch REST client 7.12.0.
+      </action>      
     </release>
 
     <release version="5.0.0-M1" date="2021-03-01" description="Feature release">

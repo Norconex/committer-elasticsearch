@@ -65,7 +65,7 @@ class ElasticsearchCommitterTest {
     private static final Logger LOG = LoggerFactory.getLogger(
             ElasticsearchCommitterTest.class);
 
-    private static final String TEST_ES_VERSION = "7.8.1";
+    private static final String TEST_ES_VERSION = "7.12.0";
     private static final String TEST_INDEX = "tests";
     private static final String TEST_ID = "1";
     private static final String TEST_CONTENT = "This is test content.";
@@ -78,10 +78,9 @@ class ElasticsearchCommitterTest {
 
     @Container
     static ElasticsearchContainer container = new ElasticsearchContainer(
-            new DockerImageName(
-                    "docker.elastic.co/elasticsearch/elasticsearch",
-                    TEST_ES_VERSION).toString());
-
+            DockerImageName.parse(
+                    "docker.elastic.co/elasticsearch/elasticsearch")
+                .withTag(TEST_ES_VERSION));
 
     private static RestClient restClient;
 
