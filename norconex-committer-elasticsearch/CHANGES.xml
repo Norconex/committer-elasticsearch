@@ -7,6 +7,15 @@
   </properties>
   <body>
 
+    <release version="4.1.2-SNAPSHOT" date="2021-??-??" description="Maintenance release">
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Elasticsearch REST client 7.12.0.
+      </action>
+      <action dev="essiembre" type="update">
+        Now using Testcontainers for Elasticsearch tests.
+      </action>    
+    </release>
+
     <release version="4.1.1" date="2019-12-22" description="Maintenance release">
       <action dev="essiembre" type="update">
         Configuration option "typeName" is now optional (as it is deprecated 

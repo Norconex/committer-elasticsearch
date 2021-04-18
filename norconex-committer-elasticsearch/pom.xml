@@ -1,5 +1,5 @@
 <!--
-   Copyright 2013-2019 Norconex Inc.
+   Copyright 2013-2021 Norconex Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.norconex.collectors</groupId>
   <artifactId>norconex-committer-elasticsearch</artifactId>
-  <version>4.1.1</version>
+  <version>4.1.2-SNAPSHOT</version>
   <name>Norconex Committer Elasticsearch</name>
   <description>Elasticsearch implementation of Norconex Committer.</description>
 
@@ -28,7 +28,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>    
     <site.baseurl />
     <norconex-commons-lang.version>1.15.1</norconex-commons-lang.version>
-    <elasticsearch.version>7.5.1</elasticsearch.version>
+    <elasticsearch.version>7.12.0</elasticsearch.version>
+    <testcontainers.version>1.15.2</testcontainers.version>
   </properties>
   <inceptionYear>2013</inceptionYear>
 
@@ -96,20 +97,12 @@
         <version>1.7.12</version>
       <scope>test</scope>
     </dependency>
-    <!-- This better for unit testing until ES comes up with embedded
-         that gets a rest client. org.elasticsearch.test:framework 
-         does not offer embedded ES.
-         
-         Do not go higher than 2.4.0 until this is fixed:
-         https://github.com/allegro/embedded-elasticsearch/issues/31
-         (or it will hang on Windows).
-     -->
     <dependency>
-      <groupId>pl.allegro.tech</groupId>
-      <artifactId>embedded-elasticsearch</artifactId>
-      <version>2.4.0</version>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>elasticsearch</artifactId>
+      <version>${testcontainers.version}</version>
       <scope>test</scope>
-    </dependency>
+    </dependency>    
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -347,7 +340,7 @@
                 <delete dir="${project.build.directory}/site/css" />
                 <delete dir="${project.build.directory}/site/images" />
                 <delete file="${project.build.directory}/site/project-reports.html" />
-                <copy file="${basedir}/src/changes/changes.xml" todir="${project.build.directory}/site/"/>
+                <copy file="${basedir}/CHANGES.xml" todir="${project.build.directory}/site/"/>
               </target>
             </configuration>
           </execution>

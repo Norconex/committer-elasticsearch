@@ -1,4 +1,4 @@
-/* Copyright 2013-2019 Norconex Inc.
+/* Copyright 2013-2021 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -42,25 +41,22 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import com.norconex.committer.core.CommitterException;
 import com.norconex.commons.lang.map.Properties;
-
-import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
-import pl.allegro.tech.embeddedelasticsearch.PopularProperties;
 
 public class ElasticsearchCommitterTest {
 
     private static final Logger LOG =
             LogManager.getLogger(ElasticsearchCommitterTest.class);
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
-
-    private static final String TEST_ES_VERSION = "5.6.3";
+    private static final String TEST_ES_VERSION = "7.12.0";
     private static final String TEST_INDEX = "tests";
     private static final String TEST_TYPE = "test";
     private static final String TEST_ID = "1";
@@ -71,7 +67,15 @@ public class ElasticsearchCommitterTest {
     private static final String CONTENT_FIELD =
             ElasticsearchCommitter.DEFAULT_ES_CONTENT_FIELD;
 
-    private static EmbeddedElastic elastic;
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
+
+    @ClassRule
+    public static ElasticsearchContainer elastic = new ElasticsearchContainer(
+            DockerImageName.parse(
+                    "docker.elastic.co/elasticsearch/elasticsearch")
+                            .withTag(TEST_ES_VERSION));
+
     private static RestClient restClient;
     private static String node;
 
@@ -80,15 +84,7 @@ public class ElasticsearchCommitterTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        elastic = EmbeddedElastic.builder()
-                .withElasticVersion(TEST_ES_VERSION)
-                .withSetting(PopularProperties.CLUSTER_NAME, "test_cluster")
-                .withStartTimeout(5, TimeUnit.MINUTES)
-                .build()
-                .start();
-
-        node = "http://localhost:" + elastic.getHttpPort();
-
+        node = "http://localhost:" + elastic.getFirstMappedPort();
         restClient = RestClient.builder(HttpHost.create(node)).build();
     }
 
@@ -114,9 +110,6 @@ public class ElasticsearchCommitterTest {
     @AfterClass
     public static void afterClass() {
         IOUtils.closeQuietly(restClient);
-        if (elastic != null) {
-            elastic.stop();
-        }
     }
 
     @Test
@@ -161,7 +154,9 @@ public class ElasticsearchCommitterTest {
 
     @Test
     public void testRemoveQueuedFilesAfterDelete() throws Exception {
-        // Add new doc to ES
+        // make sure index exists
+        restClient.performRequest(new Request("PUT", INDEX_ENDPOINT));
+        // Remove doc from ES
         committer.remove(TEST_ID, new Properties());
         committer.commit();
 
