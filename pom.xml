@@ -20,11 +20,11 @@
   <parent>
     <groupId>com.norconex.commons</groupId>
     <artifactId>norconex-commons-maven-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-M2</version>
   </parent>
   <groupId>com.norconex.collectors</groupId>
   <artifactId>norconex-committer-elasticsearch</artifactId>
-  <version>5.0.0-SNAPSHOT</version>
+  <version>5.0.0-M2</version>
   <name>Norconex Committer Elasticsearch</name>
   <description>Elasticsearch implementation of Norconex Committer.</description>
 

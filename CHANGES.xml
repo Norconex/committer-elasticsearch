@@ -7,7 +7,8 @@
   </properties>
   <body>
 
-    <release version="5.0.0-SNAPSHOT" date="2021-??-??" description="Feature release">
+    <release version="5.0.0-M2" date="2021-07-28"
+        description="Changes since last milestone for this upcoming major release.">
       <action dev="essiembre" type="update">
         Added back "typeName" support for backward compatibility with older
         versions of Elasticsearch (lower than 7.0).
