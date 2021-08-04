@@ -213,6 +213,7 @@ import com.norconex.commons.lang.xml.XML;
  * </p>
  * @author Pascal Essiembre
  */
+@SuppressWarnings("javadoc")
 public class ElasticsearchCommitter extends AbstractBatchCommitter {
 
     private static final Logger LOG =
