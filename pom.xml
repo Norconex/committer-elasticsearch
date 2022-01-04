@@ -176,24 +176,6 @@
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
 
-
-
-            <!-- TODO: DELETE ME -->
-            <plugin>
-              <groupId>org.owasp</groupId>
-              <artifactId>dependency-check-maven</artifactId>
-              <version>6.5.1</version>
-              <executions>
-                  <execution>
-                      <goals>
-                          <goal>check</goal>
-                      </goals>
-                  </execution>
-              </executions>
-            </plugin>  
-
-
-
     </plugins>
   </build>
 
