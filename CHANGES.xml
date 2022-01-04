@@ -7,15 +7,23 @@
   </properties>
   <body>
 
-    <release version="5.0.0-RC1" date="2021-10-10" 
-        description="Release Candidate 1.">
+    <release version="5.0.0" date="2022-01-04" 
+            description="Major release. NOT a drop-in replacement for 4.x.">
+
+      <!-- 5.0.0 (GA) -->
+
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Elasticsearch REST client 7.16.2.
+      </action>
+
+      <!-- 5.0.0-RC1 -->
+
       <action dev="essiembre" type="fix">
         Fixed invalid configuration in POM "maven-dependency-plugin".
       </action>
-    </release>
-
-    <release version="5.0.0-M2" date="2021-07-28"
-        description="Changes since last milestone for this upcoming major release.">
+      
+      <!-- 5.0.0-M2 -->
+      
       <action dev="essiembre" type="update">
         Added back "typeName" support for backward compatibility with older
         versions of Elasticsearch (lower than 7.0).
@@ -23,9 +31,9 @@
       <action dev="essiembre" type="update">
         Maven dependency updates: Elasticsearch REST client 7.12.0.
       </action>      
-    </release>
-
-    <release version="5.0.0-M1" date="2021-03-01" description="Feature release">
+      
+      <!-- 5.0.0-M1 -->
+      
       <action dev="essiembre" type="add">
         Ability to perform field mappings.
       </action>

@@ -20,16 +20,17 @@
   <parent>
     <groupId>com.norconex.commons</groupId>
     <artifactId>norconex-commons-maven-parent</artifactId>
-    <version>1.0.0-RC1</version>
+    <version>1.0.0</version>
   </parent>
   <groupId>com.norconex.collectors</groupId>
   <artifactId>norconex-committer-elasticsearch</artifactId>
-  <version>5.0.0-RC1</version>
+  <version>5.0.0</version>
   <name>Norconex Committer Elasticsearch</name>
   <description>Elasticsearch implementation of Norconex Committer.</description>
 
   <properties>
-    <elasticsearch.version>7.12.0</elasticsearch.version>
+    <elasticsearch.version>7.16.2</elasticsearch.version>
+    <httpclient.version>4.5.13</httpclient.version>
   </properties>
   <inceptionYear>2013</inceptionYear>
 
@@ -39,6 +40,11 @@
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-api</artifactId>
         <version>${junit-jupiter.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${httpclient.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -169,6 +175,24 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
+
+
+
+            <!-- TODO: DELETE ME -->
+            <plugin>
+              <groupId>org.owasp</groupId>
+              <artifactId>dependency-check-maven</artifactId>
+              <version>6.5.1</version>
+              <executions>
+                  <execution>
+                      <goals>
+                          <goal>check</goal>
+                      </goals>
+                  </execution>
+              </executions>
+            </plugin>  
+
+
 
     </plugins>
   </build>
