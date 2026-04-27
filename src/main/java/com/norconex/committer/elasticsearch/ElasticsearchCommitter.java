@@ -34,6 +34,7 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringExclude;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
@@ -41,6 +42,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.Node;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
@@ -140,6 +142,13 @@ import com.norconex.commons.lang.xml.XML;
  * <h3>Authentication</h3>
  * <p>
  * Basic authentication is supported for password-protected clusters.
+ * Alternatively, API Key authentication can be used by providing the
+ * encoded API key value via the {@link #setApiKey(String)} method
+ * or the <code>&lt;apiKey&gt;</code> XML configuration element.
+ * When an API key is set, it takes precedence over basic credentials.
+ * The API key value should be the Base64-encoded string as provided
+ * by Elasticsearch (i.e., the value sent in the
+ * <code>Authorization: ApiKey ...</code> header).
  * </p>
  *
  * {@nx.include com.norconex.commons.lang.security.Credentials#doc}
@@ -179,10 +188,14 @@ import com.norconex.commons.lang.xml.XML;
  *     [false|true](Forces references to fit into Elasticsearch _id field.)
  *   </fixBadIds>
  *
- *   <!-- Use the following if authentication is required. -->
+ *   <!-- Use "credentials" for basic auth, or "apiKey" for API Key auth. -->
  *   <credentials>
  *     {@nx.include com.norconex.commons.lang.security.Credentials@nx.xml.usage}
  *   </credentials>
+ *   <apiKey>
+ *     (Base64-encoded API key for Elasticsearch API Key authentication.
+ *      When set, takes precedence over basic credentials.)
+ *   </apiKey>
  *
  *   <sourceIdField>
  *     (Optional document field name containing the value that will be stored
@@ -244,6 +257,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
     private boolean ignoreResponseErrors;
     private boolean discoverNodes;
     private final Credentials credentials = new Credentials();
+    private String apiKey;
     private String dotReplacement;
     private String jsonFieldsPattern;
     private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
@@ -419,6 +433,26 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
      */
     public void setCredentials(Credentials credentials) {
         this.credentials.copyFrom(credentials);
+    }
+
+    /**
+     * Gets the API key for Elasticsearch API Key authentication.
+     * @return the Base64-encoded API key, or <code>null</code>
+     * @since 5.0.0
+     */
+    public String getApiKey() {
+        return apiKey;
+    }
+    /**
+     * Sets the API key for Elasticsearch API Key authentication.
+     * When set, this takes precedence over basic credentials.
+     * The value should be the Base64-encoded API key as provided
+     * by Elasticsearch.
+     * @param apiKey the Base64-encoded API key
+     * @since 5.0.0
+     */
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
     }
 
     /**
@@ -729,7 +763,11 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
                 .setConnectTimeout(connectionTimeout)
                 .setSocketTimeout(socketTimeout));
 
-        if (credentials.isSet()) {
+        if (StringUtils.isNotBlank(apiKey)) {
+            Header authHeader = new BasicHeader(
+                    "Authorization", "ApiKey " + apiKey);
+            builder.setDefaultHeaders(new Header[]{ authHeader });
+        } else if (credentials.isSet()) {
             CredentialsProvider credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(
                     AuthScope.ANY, new UsernamePasswordCredentials(
@@ -762,6 +800,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
         xml.addElement("ignoreResponseErrors", isIgnoreResponseErrors());
         xml.addElement("discoverNodes", isDiscoverNodes());
         credentials.saveToXML(xml.addElement("credentials"));
+        xml.addElement("apiKey", getApiKey());
         xml.addElement("dotReplacement", getDotReplacement());
         xml.addElement("jsonFieldsPattern", getJsonFieldsPattern());
         xml.addElement("connectionTimeout", getConnectionTimeout());
@@ -779,6 +818,7 @@ public class ElasticsearchCommitter extends AbstractBatchCommitter {
                 "ignoreResponseErrors", isIgnoreResponseErrors()));
         setDiscoverNodes(xml.getBoolean("discoverNodes", isDiscoverNodes()));
         xml.ifXML("credentials", x -> x.populate(credentials));
+        setApiKey(xml.getString("apiKey", getApiKey()));
         setDotReplacement(xml.getString("dotReplacement", getDotReplacement()));
         setJsonFieldsPattern(
                 xml.getString("jsonFieldsPattern", getJsonFieldsPattern()));

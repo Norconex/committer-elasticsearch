@@ -7,6 +7,16 @@
   </properties>
   <body>
 
+    <release version="5.1.0-SNAPSHOT" date="2026-??-??" 
+      description="Minor release.">
+      <action dev="dana-n" type="add" issue="43">
+        Added support for API key authentication.
+      </action>
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Elasticsearch REST client 9.3.3.
+      </action>
+    </release>
+
     <release version="5.0.0" date="2022-01-04" 
             description="Major release. NOT a drop-in replacement for 4.x.">
 

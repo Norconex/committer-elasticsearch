@@ -53,6 +53,8 @@ public class ElasticsearchCommitterConfigTest {
                 TextMatcher.basic("title"),
                 TextMatcher.wildcard("Nah!")));
 
+        c.setApiKey("QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
+
         c.setSourceIdField("mySourceIdField");
         c.setTargetContentField("myTargetContentField");
 
