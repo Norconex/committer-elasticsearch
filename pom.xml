@@ -13,31 +13,23 @@
    See the License for the specific language governing permissions and
    limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.norconex.commons</groupId>
-    <artifactId>norconex-commons-maven-parent</artifactId>
-    <version>1.2.0</version>
+    <groupId>com.norconex.collectors.v3</groupId>
+    <artifactId>norconex-collector-parent</artifactId>
+    <version>3.2.0-SNAPSHOT</version>
   </parent>
-  <groupId>com.norconex.collectors</groupId>
+  <groupId>com.norconex.collectors.v3</groupId>
   <artifactId>norconex-committer-elasticsearch</artifactId>
-  <version>5.1.0-SNAPSHOT</version>
+  <version>3.2.0-SNAPSHOT</version>
   <name>Norconex Committer Elasticsearch</name>
   <description>Elasticsearch implementation of Norconex Committer.</description>
-
   <properties>
-  
-    <norconex-committer-core.version>3.0.0</norconex-committer-core.version>
-  
     <elasticsearch.version>9.3.3</elasticsearch.version>
     <httpclient.version>4.5.13</httpclient.version>
-    
   </properties>
   <inceptionYear>2013</inceptionYear>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -52,18 +44,14 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
   <dependencies>
-
     <dependency>
       <groupId>com.norconex.commons</groupId>
       <artifactId>norconex-commons-lang</artifactId>
     </dependency>
-  
     <dependency>
-      <groupId>com.norconex.collectors</groupId>
+      <groupId>com.norconex.collectors.v3</groupId>
       <artifactId>norconex-committer-core</artifactId>
-      <version>${norconex-committer-core.version}</version>
     </dependency>
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
@@ -75,7 +63,6 @@
       <artifactId>elasticsearch-rest-client-sniffer</artifactId>
       <version>${elasticsearch.version}</version>
     </dependency>
-    
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>
@@ -83,41 +70,37 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
-    </dependency>      
-    
+    </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers-junit-jupiter</artifactId>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers-elasticsearch</artifactId>
       <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>com.norconex.commons</groupId>
-        <artifactId>norconex-commons-lang</artifactId>
-        <classifier>resources</classifier>
-        <type>zip</type>
-        <scope>provided</scope>
+      <groupId>com.norconex.commons</groupId>
+      <artifactId>norconex-commons-lang</artifactId>
+      <classifier>resources</classifier>
+      <type>zip</type>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -126,38 +109,33 @@
                we need to include that dependency here. -->
           <tagletArtifacts combine.children="append">
             <tagletArtifact>
-              <groupId>com.norconex.collectors</groupId>
+              <groupId>com.norconex.collectors.v3</groupId>
               <artifactId>norconex-committer-core</artifactId>
-              <version>${norconex-committer-core.version}</version>
+              <version>${project.version}</version>
             </tagletArtifact>
           </tagletArtifacts>
           <failOnError>false</failOnError>
           <failOnWarning>false</failOnWarning>
-          <quiet>true</quiet>          
+          <quiet>true</quiet>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
-    
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
       </plugin>
-      
       <!--  Use VM argument -Dgpg.skip=true to disable GPG signing. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
       </plugin>
-
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
       </plugin>
-      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -178,22 +156,18 @@
           </execution>
         </executions>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
-
     </plugins>
   </build>
-
   <distributionManagement>
     <site>
       <id>norconex-site-deployment</id>
       <url>${site.baseurl}/committers/elasticsearch/v5</url>
     </site>
   </distributionManagement>
-
   <url>https://opensource.norconex.com/committers/elasticsearch</url>
   <scm>
     <url>https://github.com/Norconex/committer-elasticsearch</url>
@@ -204,5 +178,4 @@
     <url>https://github.com/Norconex/committer-elasticsearch/issues</url>
     <system>GitHub</system>
   </issueManagement>
-
 </project>
