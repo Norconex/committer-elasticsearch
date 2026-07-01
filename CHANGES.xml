@@ -7,13 +7,17 @@
   </properties>
   <body>
 
-    <release version="5.1.0-SNAPSHOT" date="2026-??-??" 
+    <release version="3.2.0-SNAPSHOT" date="2026-07-01" 
       description="Minor release.">
       <action dev="dana-n" type="add" issue="43">
         Added support for API key authentication.
       </action>
       <action dev="essiembre" type="update">
         Maven dependency updates: Elasticsearch REST client 9.3.3.
+      </action>
+      <action dev="essiembre" type="update">
+        Aligned release numbering, coordinates, and publishing with the
+        synchronized Norconex v3 stack.
       </action>
     </release>
 
