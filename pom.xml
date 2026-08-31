@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.norconex.collectors</groupId>
     <artifactId>norconex-collector-parent</artifactId>
-    <version>3.2.0</version>
+    <version>3.2.1-SNAPSHOT</version>
   </parent>
   <!-- Deliberately its own groupId, not the shared com.norconex.collectors: this
        module's version history ran ahead independently (it was at 5.0.0, its
@@ -33,7 +33,7 @@
        version-synced 3.2.0 release needs this groupId instead. -->
   <groupId>com.norconex.collectors.v3-align</groupId>
   <artifactId>norconex-committer-elasticsearch</artifactId>
-  <version>3.2.0</version>
+  <version>3.2.1-SNAPSHOT</version>
   <name>Norconex Committer Elasticsearch</name>
   <description>Elasticsearch implementation of Norconex Committer.</description>
   <properties>
