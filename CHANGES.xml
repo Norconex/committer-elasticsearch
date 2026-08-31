@@ -7,7 +7,7 @@
   </properties>
   <body>
 
-    <release version="3.2.0-SNAPSHOT" date="2026-07-01" 
+    <release version="3.2.0" date="2026-08-31" 
       description="Minor release.">
       <action dev="dana-n" type="add" issue="43">
         Added support for API key authentication.
